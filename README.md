@@ -1,69 +1,61 @@
 # MyFinance
 
-Plataforma web (Rails 7 + TailwindCSS v4 + Turbo/Stimulus) para controle financeiro pessoal: cadastre receitas, despesas, metas e acompanhe saldo mensal com UI responsiva e acessível.
+Aplicação Rails para controle financeiro pessoal (receitas, despesas, categorias, metas) usando MariaDB e TailwindCSS v4.
 
-## Stack
+## Stack resumida
 - Ruby 3.0.2 · Rails 7.1.6
-- MariaDB 10.11 (via Docker)
+- MariaDB 10.11 (Docker)
 - TailwindCSS v4 (gem `tailwindcss-rails`)
-- Turbo/Stimulus (importmap) + Select2 (via CDN)
+- Turbo/Stimulus via importmap
 
 ## Requisitos
-- Docker e Docker Compose instalados
-- Porta 3000 livre para a aplicação e 3307 (mapeia 3306 do MariaDB) para o banco
+- Docker + Docker Compose
+- Portas: 3000 (app) e 3307 (mapeia 3306 do MariaDB)
 
-## Configuração rápida (Docker)
+## Subir com Docker (passos mínimos)
 ```bash
-# 1) Instalar dependências Ruby e front dentro da imagem
-docker compose build --no-cache web
+# Build da imagem
+docker compose build web
 
-# 2) Subir banco
+# Subir banco
 docker compose up -d db
 
-# 3) Criar banco e rodar seeds (cria usuário demo e categorias padrão por usuário)
+# Criar banco, migrar e seed (cria usuário demo e categorias)
 docker compose run --rm web bin/rails db:create db:migrate db:seed
 
-# 4) Precompilar assets (Tailwind v4, importmap)
+# Build de assets (Tailwind) e pré-compilação
 docker compose run --rm web bin/rails tailwindcss:build
 docker compose run --rm web bin/rails assets:precompile
 
-# 5) Subir aplicação
+# Subir aplicação
 docker compose up -d web
 ```
+App em: http://localhost:3000
 
-Acesse http://localhost:3000
-
-Credenciais seed (podem ser alteradas via env `SEED_USER_EMAIL`/`SEED_USER_PASSWORD`):
+Credenciais seed (alteráveis via `SEED_USER_EMAIL`/`SEED_USER_PASSWORD`):
 - Email: `demo@example.com`
 - Senha: `password123`
 
-## Uso básico
-- Botões “Nova receita” e “Nova despesa” já definem o tipo e abrem o formulário.
-- Categorias são criadas por usuário (callback no `User`). Para popular usuários existentes:
+## Desenvolvimento local (sem Docker)
+1) Ruby 3.0.2 + bundler 2.5.11  
+2) MariaDB configurado conforme `config/database.yml` (user `app`, senha `password`, DB `my_finance_development` por padrão)  
+3) `bundle install`  
+4) `bin/rails db:create db:migrate db:seed`  
+5) `bin/rails tailwindcss:build`  
+6) `bin/rails server`
+
+## Tarefas úteis
+- Repopular categorias padrão para todos os usuários existentes:
   ```bash
   docker compose run --rm web bin/rails bootstrap:categories
   ```
-- Dropdowns usam Select2 com busca e badges de tipo; grupos de categorias são filtrados pelo tipo da transação.
-
-## Desenvolvimento local (sem Docker)
-1. Instale Ruby 3.0.2 e bundler 2.5.11.
-2. Instale MariaDB e crie um usuário/DB conforme `config/database.yml` (default: user `app`, senha `password`, DB `my_finance_development`).
-3. `bundle install`
-4. `bin/rails db:create db:migrate db:seed`
-5. `bin/rails tailwindcss:build`
-6. `bin/rails server`
-
-## Scripts úteis
-- Rodar seeds + categorias para todos usuários: `bin/rails bootstrap:categories`
-- Limpar e reconstruir assets: `bin/rails assets:clobber && bin/rails tailwindcss:build && bin/rails assets:precompile`
-
-## Notas de UI/UX
-- Paleta semântica: verde (confirmar), vermelho (perigo), azul (informativo), âmbar (alerta).
-- Formulário de transação mostra badge de tipo e filtra categorias por receita/despesa.
-- Select2 estilizado para harmonizar com Tailwind (borda única, foco suave).
+- Limpar e reconstruir assets:
+  ```bash
+  bin/rails assets:clobber && bin/rails tailwindcss:build && bin/rails assets:precompile
+  ```
 
 ## Testes
-(Nenhum test suite configurado ainda. Sugestão: adicionar RSpec ou Minitest com system tests para fluxos de transação.)
+Ainda não configurado (sugestão: adicionar RSpec ou Minitest + system tests).
 
 ## Suporte
-Issues e PRs são bem-vindos. Ajuste variáveis no `docker-compose.yml`/`.env.example` conforme seu ambiente.***
+Ajuste variáveis no `docker-compose.yml` ou `.env.example`. Issues/PRs são bem-vindos.
