@@ -1,0 +1,12 @@
+Rails.application.routes.draw do
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  resources :users, only: %i[new create]
+  resource :session, only: %i[new create destroy]
+
+  resources :categories, except: %i[show]
+  resources :transactions, except: %i[show]
+  get "dashboard", to: "dashboard#index"
+
+  root "dashboard#index"
+end

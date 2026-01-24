@@ -1,0 +1,42 @@
+<div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900">Transações</h1>
+      <p class="text-sm text-slate-600">Controle suas receitas e despesas rapidamente.</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Nova receita", new_transaction_path(type: :income), data: { turbo_frame: "transaction_form" }, class: "rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400" %>
+      <%= link_to "Nova despesa", new_transaction_path(type: :expense), data: { turbo_frame: "transaction_form" }, class: "rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-600 focus:outline focus:outline-2 focus:outline-amber-300" %>
+    </div>
+  </div>
+
+  <%= turbo_frame_tag "transaction_form" do %>
+    <%= render "form", transaction: @transaction, categories: @categories %>
+  <% end %>
+
+  <%= turbo_frame_tag "transactions" do %>
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+        <p class="font-semibold text-slate-900">Lista de transações</p>
+        <span class="text-sm text-slate-500"><%= @transactions.size %> itens</span>
+      </header>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3">Título</th>
+              <th class="px-4 py-3">Tipo</th>
+              <th class="px-4 py-3">Valor</th>
+              <th class="px-4 py-3">Data</th>
+              <th class="px-4 py-3">Categoria</th>
+              <th class="px-4 py-3 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            <%= render @transactions %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+</div>

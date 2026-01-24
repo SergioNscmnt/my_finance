@@ -1,0 +1,7 @@
+<%= turbo_stream.prepend "transactions" do %>
+  <%= render @transaction %>
+<% end %>
+
+<%= turbo_stream.update "transaction_form" do %>
+  <%= render "form", transaction: current_user.transactions.new, categories: current_user.categories.order(:name) %>
+<% end %>

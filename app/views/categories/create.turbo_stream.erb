@@ -1,0 +1,7 @@
+<%= turbo_stream.prepend "categories" do %>
+  <%= render @category %>
+<% end %>
+
+<%= turbo_stream.update "category_form" do %>
+  <%= render "form", category: Category.new %>
+<% end %>

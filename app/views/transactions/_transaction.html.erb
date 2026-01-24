@@ -1,0 +1,17 @@
+<tr id="<%= dom_id(transaction) %>" class="hover:bg-slate-50">
+  <td class="px-4 py-3 text-sm font-medium text-slate-900"><%= transaction.title %></td>
+  <td class="px-4 py-3 text-sm">
+    <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold <%= transaction.income? ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' %>">
+      <%= transaction.income? ? 'Receita' : 'Despesa' %>
+    </span>
+  </td>
+  <td class="px-4 py-3 text-sm font-semibold <%= transaction.income? ? 'text-emerald-700' : 'text-amber-700' %>">
+    <%= transaction.income? ? '+' : '-' %> <%= number_to_currency(transaction.amount) %>
+  </td>
+  <td class="px-4 py-3 text-sm text-slate-700"><%= l(transaction.occurred_on) %></td>
+  <td class="px-4 py-3 text-sm text-slate-700"><%= transaction.category.name %></td>
+  <td class="px-4 py-3 text-sm text-right space-x-2">
+    <%= link_to "Editar", edit_transaction_path(transaction), data: { turbo_frame: "transaction_form" }, class: "rounded-md bg-blue-50 px-3 py-1.5 font-medium text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400" %>
+    <%= link_to "Excluir", transaction_path(transaction), data: { turbo_method: :delete, turbo_confirm: "Remover?" }, class: "rounded-md bg-red-600 px-3 py-1.5 font-medium text-white hover:bg-red-700 focus:outline focus:outline-2 focus:outline-red-400" %>
+  </td>
+</tr>

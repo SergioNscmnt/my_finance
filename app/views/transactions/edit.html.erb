@@ -1,0 +1,5 @@
+<h1>Editar Transação</h1>
+
+<%= turbo_frame_tag "transaction_form" do %>
+  <%= render "form", transaction: @transaction, categories: @categories %>
+<% end %>

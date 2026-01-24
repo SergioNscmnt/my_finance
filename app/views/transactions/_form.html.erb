@@ -1,0 +1,64 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <% kind_label = transaction.kind&.to_sym == :expense ? "Despesa" : "Receita" %>
+  <% kind_class = transaction.kind&.to_sym == :expense ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200" %>
+
+  <div class="flex items-center justify-between mb-2">
+    <h2 class="text-lg font-semibold text-slate-900">Nova transação</h2>
+    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= kind_class %>">
+      <%= kind_label %>
+    </span>
+  </div>
+  <p class="text-sm text-slate-600 mb-4">Registre receitas ou despesas para manter seu fluxo atualizado.</p>
+
+  <%= form_with model: transaction, data: { turbo_frame: "transaction_form" }, class: "grid gap-4 md:grid-cols-2" do |form| %>
+    <div class="md:col-span-2 space-y-1">
+      <%= form.label :title, "Título", class: "text-sm font-medium text-slate-700" %>
+      <%= form.text_field :title, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+    </div>
+
+    <div class="space-y-1">
+      <%= form.label :amount, "Valor", class: "text-sm font-medium text-slate-700" %>
+      <%= form.number_field :amount, step: 0.01, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+    </div>
+
+    <div class="space-y-1">
+      <%= form.label :occurred_on, "Data", class: "text-sm font-medium text-slate-700" %>
+      <%= form.date_field :occurred_on, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+    </div>
+
+    <% grouped_categories = categories.group_by(&:kind) %>
+    <% kind_filter = transaction.kind&.to_s %>
+    <div class="space-y-1">
+      <%= form.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700" %>
+      <select name="transaction[category_id]" id="transaction_category_select"
+              class="select2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm"
+              data-controller="select2"
+              data-placeholder="Buscar categoria">
+        <% if transaction.category_id.blank? %>
+          <option></option>
+        <% end %>
+        <% show_income = kind_filter.nil? || kind_filter == "income" %>
+        <% show_expense = kind_filter.nil? || kind_filter == "expense" %>
+        <% if show_income %>
+          <optgroup label="Receitas">
+            <% (grouped_categories["income"] || []).each do |cat| %>
+              <option value="<%= cat.id %>" data-kind="income" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
+            <% end %>
+          </optgroup>
+        <% end %>
+        <% if show_expense %>
+          <optgroup label="Despesas">
+            <% (grouped_categories["expense"] || []).each do |cat| %>
+              <option value="<%= cat.id %>" data-kind="expense" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="md:col-span-2 flex gap-2">
+      <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400" %>
+      <%= link_to "Limpar", transactions_path(type: transaction.kind), data: { turbo_frame: "transaction_form" }, class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400" %>
+    </div>
+  <% end %>
+</section>

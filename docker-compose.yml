@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mariadb:10.11
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: my_finance_development
+      MARIADB_USER: app
+      MARIADB_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  web:
+    build: .
+    command: ./bin/rails server -b 0.0.0.0 -p 3000
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: admin_finan
+      DATABASE_PASSWORD: f!n4nc31r0$
+      DATABASE_NAME: my_finance_development
+      DATABASE_NAME_TEST: my_finance_test
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    platform: linux/amd64
+    
+volumes:
+  db_data:

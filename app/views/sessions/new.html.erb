@@ -1,0 +1,29 @@
+<div class="min-h-screen bg-slate-50 text-slate-900 grid place-items-center px-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg border border-slate-200">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="h-10 w-10 rounded-lg bg-blue-600 text-white grid place-items-center font-semibold">MF</div>
+      <div>
+        <p class="text-xs text-slate-500">Bem-vindo de volta</p>
+        <p class="text-lg font-semibold text-slate-900">MyFinance</p>
+      </div>
+    </div>
+
+    <h1 class="text-xl font-semibold text-slate-900 mb-2">Entrar</h1>
+    <p class="text-sm text-slate-600 mb-4">Acesse seu painel para acompanhar receitas, despesas e metas.</p>
+
+    <%= form_with url: session_path, method: :post, data: { turbo: false }, class: "space-y-4" do |form| %>
+      <div class="space-y-1">
+        <%= form.label :email, "E-mail", class: "text-sm font-medium text-slate-700" %>
+        <%= form.email_field :email, autofocus: true, required: true, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      </div>
+      <div class="space-y-1">
+        <%= form.label :password, "Senha", class: "text-sm font-medium text-slate-700" %>
+        <%= form.password_field :password, required: true, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      </div>
+      <div class="flex items-center justify-between">
+        <%= form.submit "Entrar", class: "inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400" %>
+        <%= link_to "Criar conta", new_user_path, class: "text-sm font-medium text-blue-700 hover:text-blue-800" %>
+      </div>
+    <% end %>
+  </div>
+</div>

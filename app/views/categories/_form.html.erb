@@ -1,0 +1,23 @@
+<section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <h2 class="text-lg font-semibold text-slate-900 mb-3">Nova categoria</h2>
+  <p class="text-sm text-slate-600 mb-4">Crie categorias para classificar receitas e despesas.</p>
+
+  <%= form_with model: category, data: { turbo_frame: "category_form" }, class: "grid gap-4 md:grid-cols-2" do |form| %>
+    <div class="md:col-span-2 space-y-1">
+      <%= form.label :name, "Nome", class: "text-sm font-medium text-slate-700" %>
+      <%= form.text_field :name, required: true, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+    </div>
+    <div class="space-y-2">
+      <%= form.label :kind, "Tipo", class: "text-sm font-medium text-slate-700" %>
+      <%= form.select :kind, [["Receita", :income], ["Despesa", :expense]], {},
+        required: true,
+        id: "category_kind_select",
+        data: { controller: "select2", placeholder: "Selecione o tipo" },
+        class: "select2 w-full" %>
+    </div>
+    <div class="md:col-span-2 flex gap-2">
+      <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400" %>
+      <%= link_to "Cancelar", categories_path, data: { turbo_frame: "category_form" }, class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400" %>
+    </div>
+  <% end %>
+</section>
