@@ -4,3 +4,8 @@
 //= link application.js
 //= link controllers/index.js
 //= link controllers/select2_controller.js
+//= link controllers/modal_controller.js
+//= link controllers/chart_controller.js
+//= link controllers/currency_controller.js
+//= link controllers/dropdown_controller.js
+//= link controllers/privacy_controller.js

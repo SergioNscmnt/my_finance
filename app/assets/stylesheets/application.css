@@ -13,3 +13,104 @@
  *= require_tree .
  *= require_self
  */
+
+:root {
+  --field-height: 3rem;
+  --field-radius: 0.75rem;
+  --field-padding-y: 0.7rem;
+  --field-padding-x: 0.9rem;
+  --field-border: 1px solid #cbd5e1; /* slate-300 */
+  --field-focus: 1px solid #60a5fa;  /* blue-400 */
+  --field-bg: #fff;
+  --field-text: #0f172a;             /* slate-900 */
+}
+
+/* Inputs e dropdowns padronizados em todas as telas */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="search"],
+textarea,
+select {
+  min-height: var(--field-height);
+  padding: var(--field-padding-y) var(--field-padding-x);
+  border: var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  color: var(--field-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 100%;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+select:not([multiple]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+  padding-right: 2.5rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border: var(--field-focus);
+  outline: 2px solid #bfdbfe; /* blue-200 halo */
+  outline-offset: 1px;
+}
+
+/* Ajuste consistente para selects múltiplos */
+select[multiple],
+select[size] {
+  min-height: calc(var(--field-height) * 2.2);
+  padding-right: var(--field-padding-x);
+  background-image: none;
+}
+
+/* Tokens visuais para estados desabilitados */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: #f8fafc; /* slate-50 */
+  color: #94a3b8;      /* slate-400 */
+  cursor: not-allowed;
+}
+
+/* Oculta marcador padrão de <details>/<summary> para dropdown customizado */
+details summary {
+  list-style: none;
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Hover realçado para botões de dropdown */
+.dropdown-summary {
+  transition: transform 80ms ease, box-shadow 120ms ease;
+}
+.dropdown-summary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16, 185, 129, 0.25);
+}
+
+.dropdown-item {
+  transition: background-color 120ms ease, padding-left 120ms ease, color 120ms ease;
+}
+.dropdown-item:hover {
+  background: #f8fafc;           /* slate-50 */
+  padding-left: 1.1rem;
+  color: #0f172a;                /* slate-900 */
+}
+
+/* Versão slim para selects pontuais (ex.: filtro de período) */
+.slim-select {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.1rem;
+}

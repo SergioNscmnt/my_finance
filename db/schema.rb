@@ -30,6 +30,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_24_034637) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "payment_method", default: 0, null: false
+    t.integer "installments", default: 1, null: false
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["kind"], name: "index_transactions_on_kind"
     t.index ["user_id", "occurred_on"], name: "index_transactions_on_user_id_and_occurred_on"

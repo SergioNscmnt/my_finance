@@ -3,12 +3,15 @@
   <head>
     <title>MyFinance</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="<%= asset_path('logo.svg') %>">
+    <link rel="alternate icon" href="<%= asset_path('logo.svg') %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.5/dist/chart.umd.min.js"></script>
     <!-- Select2 (CDN) -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y3UX0rD6B7Y/h/PrK6cVxH1lZ8j6YkZ1nE=" crossorigin="anonymous"></script>
@@ -17,10 +20,10 @@
       /* Ajuste visual para harmonizar Select2 com Tailwind */
       .select2-container { width: 100% !important; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
       .select2-container .select2-selection--single {
-        min-height: 2.75rem;
-        border: 1px solid #cbd5e1; /* slate-300 */
-        border-radius: 0.75rem;     /* rounded-lg */
-        padding: 0.6rem 0.9rem;
+        min-height: var(--field-height);
+        border: var(--field-border);
+        border-radius: var(--field-radius);
+        padding: var(--field-padding-y) var(--field-padding-x);
         display: grid;
         align-items: center;
         box-shadow: none;
@@ -38,7 +41,7 @@
       .select2-container--default .select2-selection--single .select2-selection__rendered {
         padding-left: 0;
         color: #0f172a; /* slate-900 */
-        line-height: 1.25rem;
+        line-height: 1.3rem;
         outline: none !important;
       }
       .select2-container--default .select2-selection--single:hover {
@@ -76,30 +79,59 @@
   </head>
 
   <body class="bg-gray-50 text-gray-900">
-    <div class="min-h-screen">
-      <nav class="bg-white shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <%= link_to "MyFinance", root_path, class: "font-semibold text-lg" %>
-          <div class="space-x-4">
-            <% if current_user %>
-              <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 hover:text-gray-900" %>
-              <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 hover:text-gray-900" %>
-              <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 hover:text-gray-900" %>
-              <%= link_to "Sair", session_path, data: { turbo_method: :delete }, class: "text-sm text-red-600 hover:text-red-700" %>
-            <% else %>
-              <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 hover:text-gray-900" %>
-              <%= link_to "Criar conta", new_user_path, class: "text-sm text-gray-700 hover:text-gray-900" %>
-            <% end %>
-          </div>
-        </div>
-      </nav>
+    <% auth_page = controller_name == "sessions" && action_name == "new" %>
 
-      <main class="max-w-5xl mx-auto px-4 py-6">
-        <% flash.each do |type, message| %>
-          <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"><%= message %></div>
-        <% end %>
-        <%= yield %>
+    <% if auth_page %>
+      <main class="min-h-screen flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-5xl">
+          <% flash.each do |type, message| %>
+            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"><%= message %></div>
+          <% end %>
+          <%= yield %>
+        </div>
       </main>
+    <% else %>
+      <div class="min-h-screen">
+        <nav class="bg-white shadow-sm">
+          <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <%= link_to root_path, class: "flex items-center gap-1.5 font-semibold text-lg leading-none text-gray-900" do %>
+              <%= image_tag "logo.svg", class: "h-12 w-12 shrink-0 align-middle", alt: "MyFinance logo" %>
+              <span class="leading-none">MyFinance</span>
+            <% end %>
+            <div class="space-x-4">
+              <% if current_user %>
+                <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+                <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+                <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+                <%= link_to "Sair", session_path, data: { turbo_method: :delete }, class: "text-sm text-red-600 hover:text-red-700 border-b-2 border-transparent hover:border-red-500 pb-1 transition-colors" %>
+              <% else %>
+                <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+                <%= link_to "Criar conta", new_user_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+              <% end %>
+            </div>
+          </div>
+        </nav>
+
+        <main class="max-w-5xl mx-auto px-4 py-6">
+          <% flash.each do |type, message| %>
+            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"><%= message %></div>
+          <% end %>
+          <%= yield %>
+        </main>
+      </div>
+    <% end %>
+
+    <!-- Modal global controlado por Stimulus + Turbo Frame -->
+    <div data-controller="modal" data-modal-open-class="is-open">
+      <div data-modal-target="backdrop" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm hidden" data-action="click->modal#close"></div>
+      <div data-modal-target="container" class="fixed inset-0 z-50 grid place-items-center px-4 py-8 pointer-events-none hidden">
+        <div class="relative w-full max-w-3xl pointer-events-auto overflow-visible rounded-2xl bg-white shadow-2xl border border-slate-200" data-modal-target="panel">
+          <button type="button" class="absolute right-3 top-3 rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-blue-400" aria-label="Fechar" data-action="modal#close">X</button>
+          <turbo-frame id="modal" data-modal-target="frame" data-action="turbo:frame-load->modal#open turbo:submit-end->modal#handleSubmit">
+            <!-- Conteúdo carregado dinamicamente -->
+          </turbo-frame>
+        </div>
+      </div>
     </div>
 
     <!-- Stimulus controller para Select2 -->

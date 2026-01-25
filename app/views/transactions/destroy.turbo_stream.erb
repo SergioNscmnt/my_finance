@@ -1,1 +1,14 @@
 <%= turbo_stream.remove @transaction %>
+<%= turbo_stream.remove dom_id(@transaction, :dash) %>
+
+<%= turbo_stream.replace "dashboard-metrics" do %>
+  <%= render "dashboard/metrics", data: @dashboard_data %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-charts" do %>
+  <%= render "dashboard/charts", data: @dashboard_data %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-header" do %>
+  <%= render "dashboard/header", data: @dashboard_data %>
+<% end %>

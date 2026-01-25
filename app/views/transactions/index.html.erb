@@ -4,24 +4,31 @@
       <h1 class="text-2xl font-semibold text-slate-900">Transações</h1>
       <p class="text-sm text-slate-600">Controle suas receitas e despesas rapidamente.</p>
     </div>
-    <div class="flex gap-2">
-      <%= link_to "Nova receita", new_transaction_path(type: :income), data: { turbo_frame: "transaction_form" }, class: "rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400" %>
-      <%= link_to "Nova despesa", new_transaction_path(type: :expense), data: { turbo_frame: "transaction_form" }, class: "rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-600 focus:outline focus:outline-2 focus:outline-amber-300" %>
+    <div class="relative">
+      <details class="group" data-controller="dropdown">
+        <summary class="dropdown-summary list-none rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
+          Nova +
+        </summary>
+        <div class="absolute right-full mr-2 mt-2 w-40 rounded-lg border border-slate-200 bg-white shadow-lg py-1 z-10">
+          <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+          <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+        </div>
+      </details>
     </div>
   </div>
 
   <%= turbo_frame_tag "transaction_form" do %>
-    <%= render "form", transaction: @transaction, categories: @categories %>
+    <%= render "form", transaction: @transaction, categories: @categories, frame_id: "transaction_form" %>
   <% end %>
 
   <%= turbo_frame_tag "transactions" do %>
     <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+      <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 px-4 py-3">
         <p class="font-semibold text-slate-900">Lista de transações</p>
         <span class="text-sm text-slate-500"><%= @transactions.size %> itens</span>
       </header>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
           <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
             <tr>
               <th class="px-4 py-3">Título</th>
@@ -32,7 +39,7 @@
               <th class="px-4 py-3 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 bg-white">
+          <tbody id="transactions_list" class="divide-y divide-slate-100 bg-white">
             <%= render @transactions %>
           </tbody>
         </table>

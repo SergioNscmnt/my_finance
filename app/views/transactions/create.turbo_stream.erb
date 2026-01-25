@@ -1,7 +1,23 @@
-<%= turbo_stream.prepend "transactions" do %>
+<%= turbo_stream.prepend "transactions_list" do %>
   <%= render @transaction %>
 <% end %>
 
-<%= turbo_stream.update "transaction_form" do %>
-  <%= render "form", transaction: current_user.transactions.new, categories: current_user.categories.order(:name) %>
+<%= turbo_stream.prepend "dashboard_transactions" do %>
+  <%= render "transactions/dashboard_transaction", t: @transaction %>
+<% end %>
+
+<%= turbo_stream.replace "transaction_form" do %>
+  <%= render "form", transaction: current_user.transactions.new, categories: current_user.categories.order(:name), frame_id: "transaction_form" %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-metrics" do %>
+  <%= render "dashboard/metrics", data: @dashboard_data %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-charts" do %>
+  <%= render "dashboard/charts", data: @dashboard_data %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-header" do %>
+  <%= render "dashboard/header", data: @dashboard_data %>
 <% end %>

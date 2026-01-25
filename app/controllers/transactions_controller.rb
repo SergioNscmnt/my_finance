@@ -8,17 +8,21 @@ class TransactionsController < ApplicationController
     @transaction = current_user.transactions.new(kind: params[:type] || params[:kind] || :income)
     @categories  = current_user.categories.order(:name)
 
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "transaction_form",
-          partial: "transactions/form",
-          locals: { transaction: @transaction, categories: @categories }
-        )
-      end
-      format.html do
-        set_collections
-        render :index
+    if request.headers["Turbo-Frame"] == "modal"
+      render :new
+    else
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "transaction_form",
+            partial: "transactions/form",
+            locals: { transaction: @transaction, categories: @categories, frame_id: "transaction_form" }
+          )
+        end
+        format.html do
+          set_collections
+          render :index
+        end
       end
     end
   end
@@ -26,13 +30,15 @@ class TransactionsController < ApplicationController
   def create
     @transaction = current_user.transactions.new(transaction_params)
     if @transaction.save
+      @dashboard_data = dashboard_data
       respond_to do |format|
-        format.turbo_stream
+        format.turbo_stream { render :create }
         format.html { redirect_to transactions_path, notice: "Transação criada" }
       end
     else
-      set_collections
-      render :index, status: :unprocessable_entity
+      @categories = current_user.categories.order(:name)
+      template = turbo_modal? ? :new : :index
+      render template, status: :unprocessable_entity
     end
   end
 
@@ -42,20 +48,23 @@ class TransactionsController < ApplicationController
 
   def update
     if @transaction.update(transaction_params)
+      @dashboard_data = dashboard_data
       respond_to do |format|
-        format.turbo_stream
+        format.turbo_stream { render :update }
         format.html { redirect_to transactions_path, notice: "Transação atualizada" }
       end
     else
       @categories = current_user.categories.order(:name)
-      render :edit, status: :unprocessable_entity
+      template = request.headers["Turbo-Frame"] == "modal" ? :edit : :edit
+      render template, status: :unprocessable_entity
     end
   end
 
   def destroy
     @transaction.destroy
+    @dashboard_data = dashboard_data
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream { render :destroy }
       format.html { redirect_to transactions_path, notice: "Transação removida" }
     end
   end
@@ -67,7 +76,7 @@ class TransactionsController < ApplicationController
   end
 
   def transaction_params
-    params.require(:transaction).permit(:title, :amount, :kind, :occurred_on, :category_id)
+    params.require(:transaction).permit(:title, :amount, :kind, :occurred_on, :category_id, :payment_method, :installments)
   end
 
   def filtered_transactions
@@ -98,5 +107,61 @@ class TransactionsController < ApplicationController
     Date.parse(raw)
   rescue ArgumentError
     nil
+  end
+
+  def turbo_modal?
+    request.headers["Turbo-Frame"] == "modal"
+  end
+
+  def dashboard_data
+    scope = current_user.transactions.includes(:category)
+    transactions = scope.to_a
+
+    receita_total = transactions.select(&:income?).sum { |t| t.monthly_amount_for(Date.current) }
+    despesa_total = transactions.select(&:expense?).sum { |t| t.monthly_amount_for(Date.current) }
+    balance = receita_total - despesa_total
+
+    this_month = transactions.sum { |t| t.monthly_impact(Date.current) }
+    prev_month = transactions.sum { |t| t.monthly_impact(1.month.ago) }
+    monthly_change = this_month - prev_month
+
+    months_param = begin
+      m = params[:months].to_i
+      [1, 3, 6, 9, 12, 24, 36].include?(m) ? m : 1
+    end
+
+    months = (months_param - 1).downto(0).map { |i| Date.current.beginning_of_month - i.months }
+    chart_labels  = months.map { |d| d.strftime("%b/%y") }
+    chart_income  = months.map { |d| transactions.select(&:income?).sum { |t| t.monthly_amount_for(d) } }
+    chart_expense = months.map { |d| transactions.select(&:expense?).sum { |t| t.monthly_amount_for(d) } }
+
+    pie_labels = ["Receitas", "Despesas"]
+    pie_values = [receita_total, despesa_total]
+
+    current_month_expenses = transactions.select(&:expense?)
+    category_data = current_month_expenses
+                    .group_by { |t| t.category&.name || "Sem categoria" }
+                    .map { |name, txs| [name, txs.sum { |t| t.monthly_amount_for(Date.current) }] }
+                    .reject { |_name, total| total.zero? }
+                    .sort_by { |_name, total| -total }
+                    .first(6)
+    category_labels = category_data.map(&:first)
+    category_values = category_data.map(&:last)
+
+    {
+      receita_total: receita_total,
+      despesa_total: despesa_total,
+      balance: balance,
+      monthly_change: monthly_change,
+      chart_months: months_param,
+      chart_labels: chart_labels,
+      chart_income: chart_income,
+      chart_expense: chart_expense,
+      pie_labels: pie_labels,
+      pie_values: pie_values,
+      category_labels: category_labels,
+      category_values: category_values,
+      goals_count: current_user.respond_to?(:goals) ? current_user.goals.count : 0
+    }
   end
 end

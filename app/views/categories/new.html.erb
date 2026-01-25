@@ -1,9 +1,9 @@
 <%= turbo_frame_tag "modal" do %>
   <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
     <div class="flex items-center justify-between mb-2">
-      <h1 class="text-lg font-semibold text-slate-900">Editar categoria</h1>
+      <h1 class="text-lg font-semibold text-slate-900">Nova categoria</h1>
     </div>
-    <p class="text-sm text-slate-600 mb-4">Altere o nome ou tipo e salve para voltar à lista.</p>
+    <p class="text-sm text-slate-600 mb-4">Crie uma categoria para receitas ou despesas.</p>
     <%= render "form", category: @category, frame_id: "modal" %>
   </section>
 <% end %>

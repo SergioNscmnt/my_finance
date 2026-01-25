@@ -1,0 +1,20 @@
+<article id="<%= dom_id(t, :dash) %>" class="flex items-center gap-4 px-4 py-3">
+  <div class="flex-1">
+    <p class="font-medium text-slate-900"><%= t.title %></p>
+    <p class="text-sm text-slate-500">
+      <%= t.category&.name || "Sem categoria" %> · <%= l(t.occurred_on) %>
+    </p>
+  </div>
+  <% current_amount = t.monthly_amount_for(Date.current) %>
+  <% installment_idx = t.installment_number_for(Date.current) %>
+  <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700' : 'text-amber-700' %>">
+    <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>
+    <% if installment_idx %>
+      <span class="ml-1 text-xs text-slate-500">(parc. <%= installment_idx %>/<%= t.installments %>)</span>
+    <% end %>
+  </p>
+  <div class="flex items-center gap-2">
+    <%= link_to "Editar", edit_transaction_path(t), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400" %>
+    <%= button_to "Excluir", transaction_path(t), method: :delete, data: { turbo_confirm: "Excluir esta transação?" }, class: "rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 focus:outline focus:outline-2 focus:outline-red-400" %>
+  </div>
+</article>

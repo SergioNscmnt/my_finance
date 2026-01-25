@@ -1,33 +1,75 @@
-<section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="rounded-2xl border border-slate-200 bg-white p-5 pr-14 shadow-sm">
   <% kind_label = transaction.kind&.to_sym == :expense ? "Despesa" : "Receita" %>
   <% kind_class = transaction.kind&.to_sym == :expense ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200" %>
+  <% frame_id = local_assigns[:frame_id] || "transaction_form" %>
+  <% form_title = transaction.persisted? ? "Editar transação" : "Nova transação" %>
 
   <div class="flex items-center justify-between mb-2">
-    <h2 class="text-lg font-semibold text-slate-900">Nova transação</h2>
+    <h2 class="text-lg font-semibold text-slate-900"><%= form_title %></h2>
     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= kind_class %>">
       <%= kind_label %>
     </span>
   </div>
   <p class="text-sm text-slate-600 mb-4">Registre receitas ou despesas para manter seu fluxo atualizado.</p>
 
-  <%= form_with model: transaction, data: { turbo_frame: "transaction_form" }, class: "grid gap-4 md:grid-cols-2" do |form| %>
+  <%= form_with model: transaction, data: (frame_id ? { turbo_frame: frame_id } : {}), class: "grid gap-4 md:grid-cols-2" do |form| %>
+    <%= form.hidden_field :kind %>
     <div class="md:col-span-2 space-y-1">
       <%= form.label :title, "Título", class: "text-sm font-medium text-slate-700" %>
       <%= form.text_field :title, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <% if form.object.errors[:title].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:title).first %></p>
+      <% end %>
+    </div>
+
+    <div class="space-y-1" data-controller="currency">
+      <%= form.label :amount, "Valor", class: "text-sm font-medium text-slate-700" %>
+      <%= form.hidden_field :amount, data: { currency_target: "hidden" } %>
+      <%= text_field_tag :amount_display,
+            (@transaction.amount.present? ? number_to_currency(@transaction.amount, unit: "R$", separator: ",", delimiter: ".", format: "%u %n") : ""),
+            name: nil,
+            inputmode: "numeric",
+            autocomplete: "off",
+            class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none",
+            data: { currency_target: "display", action: "input->currency#format blur->currency#format" } %>
+      <% if form.object.errors[:amount].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:amount).first %></p>
+      <% end %>
     </div>
 
     <div class="space-y-1">
-      <%= form.label :amount, "Valor", class: "text-sm font-medium text-slate-700" %>
-      <%= form.number_field :amount, step: 0.01, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <%= form.label :payment_method, "Forma de pagamento", class: "text-sm font-medium text-slate-700" %>
+      <%= form.select :payment_method,
+                      Transaction.payment_methods.keys.map { |k| [k == "cash" ? "Dinheiro / Débito" : "Cartão de crédito", k] },
+                      {},
+                      class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <% if form.object.errors[:payment_method].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:payment_method).first %></p>
+      <% end %>
+    </div>
+
+    <div class="space-y-1">
+      <%= form.label :installments, "Parcelas", class: "text-sm font-medium text-slate-700" %>
+      <%= form.number_field :installments,
+            min: 1,
+            class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none",
+            value: form.object.installments || 1 %>
+      <p class="text-xs text-slate-500">Para cartão de crédito, informe o número de parcelas (somente o valor da parcela impacta o mês).</p>
+      <% if form.object.errors[:installments].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:installments).first %></p>
+      <% end %>
     </div>
 
     <div class="space-y-1">
       <%= form.label :occurred_on, "Data", class: "text-sm font-medium text-slate-700" %>
       <%= form.date_field :occurred_on, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <% if form.object.errors[:occurred_on].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:occurred_on).first %></p>
+      <% end %>
     </div>
 
     <% grouped_categories = categories.group_by(&:kind) %>
-    <% kind_filter = transaction.kind&.to_s %>
+    <% kind_filter = transaction.kind&.to_s.presence || params[:type].to_s.presence %>
     <div class="space-y-1">
       <%= form.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700" %>
       <select name="transaction[category_id]" id="transaction_category_select"
@@ -54,11 +96,15 @@
           </optgroup>
         <% end %>
       </select>
+      <% if form.object.errors[:category].any? || form.object.errors[:category_id].any? %>
+        <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:category_id).presence&.first || form.object.errors.full_messages_for(:category).first %></p>
+      <% end %>
     </div>
 
     <div class="md:col-span-2 flex gap-2">
       <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400" %>
-      <%= link_to "Limpar", transactions_path(type: transaction.kind), data: { turbo_frame: "transaction_form" }, class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400" %>
+      <% cancel_options = frame_id == "modal" ? { data: { action: "modal#close" } } : { data: { turbo_frame: frame_id } } %>
+      <%= link_to "Cancelar", frame_id == "modal" ? "#" : transactions_path(type: transaction.kind), { class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400" }.merge(cancel_options) %>
     </div>
   <% end %>
 </section>
