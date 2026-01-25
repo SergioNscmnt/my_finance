@@ -2,7 +2,8 @@ class CategoriesController < ApplicationController
   before_action :set_category, only: %i[edit update destroy]
 
   def index
-    @categories = current_user.categories.order(:name)
+    scope = current_user.categories.order(:name)
+    @pagy, @categories = pagy(scope, items: 10)
     @category = current_user.categories.new
   end
 

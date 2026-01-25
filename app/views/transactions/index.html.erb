@@ -9,9 +9,9 @@
         <summary class="dropdown-summary list-none rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
           Nova +
         </summary>
-        <div class="absolute right-full mr-2 mt-2 w-40 rounded-lg border border-slate-200 bg-white shadow-lg py-1 z-10">
-          <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
-          <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+        <div class="dropdown-menu absolute right-0 mt-1 w-48 shadow-lg z-10">
+          <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
+          <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
         </div>
       </details>
     </div>
@@ -25,7 +25,7 @@
     <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 px-4 py-3">
         <p class="font-semibold text-slate-900">Lista de transações</p>
-        <span class="text-sm text-slate-500"><%= @transactions.size %> itens</span>
+        <span class="text-sm text-slate-500"><%= @pagy&.count || @transactions.size %> itens</span>
       </header>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -44,6 +44,11 @@
           </tbody>
         </table>
       </div>
+      <% if @pagy&.pages.to_i > 1 %>
+        <div class="border-t border-slate-200 px-4 py-3 text-sm">
+          <%= pagy_nav(@pagy, link_extra: 'data-turbo-frame="transactions"').html_safe %>
+        </div>
+      <% end %>
     </section>
   <% end %>
 </div>

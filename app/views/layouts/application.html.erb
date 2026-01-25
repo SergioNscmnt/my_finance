@@ -12,69 +12,12 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.5/dist/chart.umd.min.js"></script>
-    <!-- Select2 (CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y3UX0rD6B7Y/h/PrK6cVxH1lZ8j6YkZ1nE=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Tom Select (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <style>
-      /* Ajuste visual para harmonizar Select2 com Tailwind */
-      .select2-container { width: 100% !important; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-      .select2-container .select2-selection--single {
-        min-height: var(--field-height);
-        border: var(--field-border);
-        border-radius: var(--field-radius);
-        padding: var(--field-padding-y) var(--field-padding-x);
-        display: grid;
-        align-items: center;
-        box-shadow: none;
-        background: #fff;
-        outline: none;
-      }
-      .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 100%;
-        right: 0.4rem;
-        border-left: 1px solid #e2e8f0;
-        background: #f8fafc;
-        border-top-right-radius: 0.75rem;
-        border-bottom-right-radius: 0.75rem;
-      }
-      .select2-container--default .select2-selection--single .select2-selection__rendered {
-        padding-left: 0;
-        color: #0f172a; /* slate-900 */
-        line-height: 1.3rem;
-        outline: none !important;
-      }
-      .select2-container--default .select2-selection--single:hover {
-        border-color: #cbd5e1; /* manter uniforme */
-        box-shadow: none;
-      }
-      .select2-container--default .select2-selection--single:focus,
-      .select2-container--default .select2-selection--single:focus-within {
-        border-color: #60a5fa;
-        outline: none;
-        box-shadow: 0 0 0 1px #bfdbfe; /* halo azul claro, sem borda dupla */
-      }
-      .select2-dropdown {
-        border: 1px solid #cbd5e1;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        overflow: hidden;
-      }
-      .select2-results__option { padding: 0.6rem 0.9rem; }
-      .select2-results__option--highlighted { background: #e0f2fe !important; color: #0f172a !important; }
-      .select2-results__option[aria-selected=true] { background: #e2e8f0 !important; color: #0f172a !important; }
-      .select2-results__group { font-weight: 700; color: #475569; padding: 0.6rem 0.9rem; }
       .badge-income { background-color: #ecfdf3; color: #047857; border: 1px solid #bbf7d0; }
       .badge-expense { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-      .select2-container--default .select2-results__option .badge {
-        display: inline-flex;
-        align-items: center;
-        border-radius: 9999px;
-        padding: 0.15rem 0.55rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: 0.4rem;
-      }
     </style>
   </head>
 
@@ -98,11 +41,13 @@
               <%= image_tag "logo.svg", class: "h-12 w-12 shrink-0 align-middle", alt: "MyFinance logo" %>
               <span class="leading-none">MyFinance</span>
             <% end %>
-            <div class="space-x-4">
+            <div class="flex items-center gap-4">
               <% if current_user %>
+                <span class="text-sm text-slate-600 border-b-2 border-transparent pb-1">Olá, <span class="font-semibold text-slate-900"><%= current_user.name %></span></span>
                 <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
                 <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
                 <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
+                <%= link_to "Minha conta", account_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
                 <%= link_to "Sair", session_path, data: { turbo_method: :delete }, class: "text-sm text-red-600 hover:text-red-700 border-b-2 border-transparent hover:border-red-500 pb-1 transition-colors" %>
               <% else %>
                 <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors" %>
@@ -134,81 +79,6 @@
       </div>
     </div>
 
-    <!-- Stimulus controller para Select2 -->
-    <script>
-      (() => {
-        const application = Stimulus.Application.start();
-        application.register("select2", class extends Stimulus.Controller {
-          connect() {
-            const placeholder = this.element.dataset.placeholder || "";
-            if (window.jQuery && $(this.element).select2) {
-              this.initSelect2(placeholder);
-            }
-          }
-          disconnect() {
-            if ($(this.element).data("select2")) {
-              $(this.element).select2("destroy");
-            }
-          }
-          initSelect2(placeholder) {
-            $(this.element).select2({
-              width: "100%",
-              theme: "default",
-              placeholder: placeholder,
-              dropdownParent: this.element.closest("turbo-frame")
-                ? $(this.element.closest("turbo-frame"))
-                : $(this.element).parent(),
-              templateResult: this.renderOption,
-              templateSelection: this.renderSelection.bind(this)
-            });
-          }
-          renderOption(option) {
-            if (!option.id) return option.text;
-            const kind = $(option.element).data("kind");
-            const badgeClass = kind === "expense" ? "badge badge-expense" : "badge badge-income";
-            const label = kind === "expense" ? "Despesa" : "Receita";
-            const $tpl = $(`
-              <span class="flex items-center justify-between w-full">
-                <span>${option.text}</span>
-                <span class="${badgeClass}">${label}</span>
-              </span>
-            `);
-            return $tpl;
-          }
-          renderSelection(option) {
-            if (!option.id) return option.text;
-            const kind = $(option.element).data("kind");
-            const badgeClass = kind === "expense" ? "badge badge-expense" : "badge badge-income";
-            const label = kind === "expense" ? "Despesa" : "Receita";
-            const $tpl = $(`
-              <span class="flex items-center gap-1">
-                <span>${option.text}</span>
-                <span class="${badgeClass}">${label}</span>
-              </span>
-            `);
-            return $tpl;
-          }
-        });
-
-        // Fallback global initializer for selects com classe .select2 (caso Stimulus não conecte)
-        const applySelect2 = () => {
-          document.querySelectorAll('select.select2').forEach((el) => {
-            if ($(el).data("select2")) return;
-            const placeholder = el.dataset.placeholder || "";
-            $(el).select2({
-              width: "100%",
-              theme: "default",
-              placeholder: placeholder,
-              dropdownParent: el.closest("turbo-frame")
-                ? $(el.closest("turbo-frame"))
-                : $(el).parent(),
-            });
-          });
-        };
-
-        document.addEventListener("turbo:load", applySelect2);
-        document.addEventListener("turbo:frame-load", applySelect2);
-      })();
-    </script>
+    <!-- Tom Select inicializa via Stimulus (controllers/tom_select_controller.js) -->
   </body>
 </html>

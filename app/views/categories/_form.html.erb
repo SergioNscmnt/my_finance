@@ -16,8 +16,8 @@
       <%= form.select :kind, [["Receita", :income], ["Despesa", :expense]], {},
         required: true,
         id: "category_kind_select",
-        data: { controller: "select2", placeholder: "Selecione o tipo" },
-        class: "select2 w-full" %>
+        data: { controller: "tom-select", placeholder: "Selecione o tipo" },
+        class: "tom-select w-full" %>
       <% if form.object.errors[:kind].any? %>
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:kind).first %></p>
       <% end %>

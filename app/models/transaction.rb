@@ -3,7 +3,7 @@ class Transaction < ApplicationRecord
   belongs_to :user
 
   enum kind: { income: 0, expense: 1 }
-  enum payment_method: { cash: 0, credit_card: 1 }
+  enum payment_method: { cash: 0, credit_card: 1, pix: 2 }
 
   after_initialize :set_defaults, if: :new_record?
 
@@ -14,7 +14,7 @@ class Transaction < ApplicationRecord
   validates :installments, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
 
   def per_installment_amount
-    return amount if cash? || installments.to_i <= 1
+    return amount if !credit_card? || installments.to_i <= 1
     (amount / installments).round(2)
   end
 

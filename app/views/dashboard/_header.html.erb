@@ -4,6 +4,7 @@
 
 <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:flex-wrap">
   <div class="flex flex-col gap-2">
+    <p class="text-sm text-slate-600">Olá, <span class="font-semibold text-slate-900"><%= current_user.name %></span></p>
     <div class="flex items-center gap-2">
       <div>
         <p class="text-sm text-slate-500">Saldo do mês</p>
@@ -39,9 +40,9 @@
         <summary class="dropdown-summary list-none inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
           Nova +
         </summary>
-        <div class="absolute right-full mr-2 mt-2 w-44 rounded-lg border border-slate-200 bg-white shadow-lg py-1 z-10">
-          <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
-          <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-item block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+        <div class="dropdown-menu absolute right-0 mt-1 w-48 shadow-lg z-10">
+          <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
+          <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
         </div>
       </details>
     </div>

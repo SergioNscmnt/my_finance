@@ -96,7 +96,8 @@ class TransactionsController < ApplicationController
   end
 
   def set_collections
-    @transactions ||= filtered_transactions.includes(:category).order(occurred_on: :desc, created_at: :desc)
+    scope = filtered_transactions.includes(:category).order(occurred_on: :desc, created_at: :desc)
+    @pagy, @transactions = pagy(scope, items: 10)
     @transaction  ||= current_user.transactions.new(kind: params[:type] || params[:kind] || :income)
     @categories   ||= current_user.categories.order(:name)
   end

@@ -26,6 +26,9 @@ gem "stimulus-rails"
 # Use Tailwind CSS [https://github.com/rails/tailwindcss-rails]
 gem 'tailwindcss-rails', '~> 4.4'
 
+# Pagination (Ruby 3.0 compatible)
+gem "pagy", "~> 6.5"
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 

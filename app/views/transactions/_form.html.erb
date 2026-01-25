@@ -39,8 +39,9 @@
 
     <div class="space-y-1">
       <%= form.label :payment_method, "Forma de pagamento", class: "text-sm font-medium text-slate-700" %>
+      <% payment_labels = { "cash" => "Dinheiro / Débito", "credit_card" => "Cartão de crédito", "pix" => "Pix" } %>
       <%= form.select :payment_method,
-                      Transaction.payment_methods.keys.map { |k| [k == "cash" ? "Dinheiro / Débito" : "Cartão de crédito", k] },
+                      Transaction.payment_methods.keys.map { |k| [payment_labels[k] || k.humanize, k] },
                       {},
                       class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
       <% if form.object.errors[:payment_method].any? %>
@@ -71,10 +72,10 @@
     <% grouped_categories = categories.group_by(&:kind) %>
     <% kind_filter = transaction.kind&.to_s.presence || params[:type].to_s.presence %>
     <div class="space-y-1">
-      <%= form.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700" %>
+      <%= form.label :category_id, "Categoria", class: "text-sm font-medium border-2 text-slate-700" %>
       <select name="transaction[category_id]" id="transaction_category_select"
-              class="select2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm"
-              data-controller="select2"
+              class="tom-select w-full"
+              data-controller="tom-select"
               data-placeholder="Buscar categoria">
         <% if transaction.category_id.blank? %>
           <option></option>

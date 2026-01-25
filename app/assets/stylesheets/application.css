@@ -107,10 +107,160 @@ details summary::-webkit-details-marker {
   color: #0f172a;                /* slate-900 */
 }
 
+.dropdown-menu {
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border: var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  min-height: var(--field-height);
+  padding: var(--field-padding-y) var(--field-padding-x);
+  border: var(--field-border);
+  border-radius: var(--field-radius);
+  background: #fff;
+  color: #0f172a; /* slate-900 */
+  font-size: 0.875rem;
+  line-height: 1.2rem;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.dropdown-option:hover {
+  border-color: #cbd5e1; /* slate-300 */
+  background: #f8fafc; /* slate-50 */
+}
+
 /* Versão slim para selects pontuais (ex.: filtro de período) */
 .slim-select {
   min-height: 2.25rem;
   padding: 0.35rem 0.6rem;
   font-size: 0.78rem;
   line-height: 1.1rem;
+}
+
+/* Tom Select */
+.ts-wrapper {
+  width: 100%;
+  font-size: 0.875rem;
+}
+.ts-control {
+  min-height: var(--field-height);
+  padding: var(--field-padding-y) var(--field-padding-x);
+  border: var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ts-control input {
+  color: var(--field-text);
+  font-size: 0.875rem;
+}
+.ts-wrapper.single .ts-control:after {
+  border-color: #94a3b8 transparent transparent;
+  margin-top: 0.25rem;
+}
+.ts-dropdown {
+  border: var(--field-border);
+  border-radius: var(--field-radius);
+  background: #f8fafc;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+.ts-dropdown .ts-dropdown-input {
+  padding: 0.45rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f1f5f9;
+}
+.ts-dropdown .ts-dropdown-input input {
+  width: 100%;
+  min-height: var(--field-height);
+  padding: var(--field-padding-y) var(--field-padding-x);
+  border: var(--field-border) !important;
+  border-radius: var(--field-radius);
+  background: #fff;
+  color: var(--field-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.ts-dropdown .option {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+.ts-dropdown .option.active,
+.ts-dropdown .option:hover {
+  background: #e2e8f0;
+}
+.ts-dropdown .optgroup-header {
+  padding: 0.45rem 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+.ts-dropdown .option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.ts-dropdown .badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.ts-dropdown .badge-income { background-color: #ecfdf3; color: #047857; border: 1px solid #bbf7d0; }
+.ts-dropdown .badge-expense { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+
+/* Pagy pagination */
+.pagy-nav.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+.pagy-nav .page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  background: #fff;
+  color: #475569; /* slate-600 */
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.pagy-nav .page a {
+  color: inherit;
+  text-decoration: none;
+}
+.pagy-nav .page:hover {
+  border-color: #cbd5e1; /* slate-300 */
+  color: #0f172a; /* slate-900 */
+  background: #f8fafc; /* slate-50 */
+}
+.pagy-nav .page.active {
+  border-color: #10b981; /* emerald-500 */
+  background: #ecfdf5; /* emerald-50 */
+  color: #047857; /* emerald-700 */
+  font-weight: 600;
+}
+.pagy-nav .page.disabled {
+  color: #94a3b8; /* slate-400 */
+  background: #f8fafc; /* slate-50 */
+  cursor: not-allowed;
 }
