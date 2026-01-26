@@ -199,6 +199,81 @@ details summary::-webkit-details-marker {
 .ts-dropdown .option:hover {
   background: #e2e8f0;
 }
+
+/* Flatpickr: mantém cabeçalho acima do grid de dias e garante z-index alto */
+.flatpickr-calendar {
+  z-index: 50; /* acima de inputs e dropdowns locais */
+}
+.flatpickr-calendar .flatpickr-months {
+  position: relative;
+  z-index: 6;
+  padding: 6px 8px 4px;
+  background: #fff;
+  margin-bottom: 4px;
+}
+.flatpickr-calendar .flatpickr-current-month .numInputWrapper,
+.flatpickr-calendar .flatpickr-monthDropdown-months {
+  position: relative;
+  z-index: 7;
+  background: #fff;
+}
+.flatpickr-calendar .flatpickr-weekdays {
+  margin-top: 2px;
+  background: #fff;
+}
+
+/* Neutraliza o estilo global de inputs/selects dentro do flatpickr,
+   para o cabeçalho não ficar gigante nem deslocar o grid. */
+.flatpickr-calendar input[type="text"],
+.flatpickr-calendar input[type="number"],
+.flatpickr-calendar select {
+  min-height: 1.75rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+  box-shadow: none;
+  width: auto;
+}
+.flatpickr-calendar select:not([multiple]) {
+  appearance: auto;
+  background-image: none;
+  padding-right: 1.5rem;
+}
+.flatpickr-calendar *,
+.flatpickr-calendar *::before,
+.flatpickr-calendar *::after {
+  box-sizing: border-box;
+}
+.flatpickr-calendar .flatpickr-months .flatpickr-month {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+.flatpickr-calendar .flatpickr-current-month {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+}
+.flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months {
+  width: auto !important;
+  min-width: 110px;
+  height: 32px;
+  padding: 4px 6px;
+  margin: 0;
+  font-size: 0.95rem;
+}
+.flatpickr-calendar .flatpickr-current-month .numInputWrapper input {
+  height: 32px;
+  min-height: 32px;
+  padding: 4px 6px;
+  font-size: 0.95rem;
+}
 .ts-dropdown .optgroup-header {
   padding: 0.45rem 0.75rem;
   font-weight: 700;

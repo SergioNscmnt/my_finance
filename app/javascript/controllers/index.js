@@ -5,6 +5,8 @@ import ChartController from "./chart_controller"
 import CurrencyController from "./currency_controller"
 import DropdownController from "./dropdown_controller"
 import PrivacyController from "./privacy_controller"
+import MobileMenuController from "./mobile_menu_controller"
+import DatepickerController from "./datepicker_controller"
 
 const application = Application.start()
 
@@ -17,3 +19,5 @@ application.register("chart", ChartController)
 application.register("currency", CurrencyController)
 application.register("dropdown", DropdownController)
 application.register("privacy", PrivacyController)
+application.register("mobile-menu", MobileMenuController)
+application.register("datepicker", DatepickerController)

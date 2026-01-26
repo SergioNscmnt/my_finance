@@ -63,7 +63,10 @@
 
     <div class="space-y-1">
       <%= form.label :occurred_on, "Data", class: "text-sm font-medium text-slate-700" %>
-      <%= form.date_field :occurred_on, required: true, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <%= form.date_field :occurred_on,
+            required: true,
+            class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none",
+            data: { controller: "datepicker", "datepicker-alt-format-value": "d/m/Y", "datepicker-date-format-value": "Y-m-d" } %>
       <% if form.object.errors[:occurred_on].any? %>
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:occurred_on).first %></p>
       <% end %>
@@ -71,7 +74,7 @@
 
     <% grouped_categories = categories.group_by(&:kind) %>
     <% kind_filter = transaction.kind&.to_s.presence || params[:type].to_s.presence %>
-    <div class="space-y-1">
+    <div class="space-y-1 rounded-lg">
       <%= form.label :category_id, "Categoria", class: "text-sm font-medium border-2 text-slate-700" %>
       <select name="transaction[category_id]" id="transaction_category_select"
               class="tom-select w-full"

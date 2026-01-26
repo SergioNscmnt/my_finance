@@ -9,3 +9,5 @@
 //= link controllers/dropdown_controller.js
 //= link controllers/privacy_controller.js
 //= link controllers/tom_select_controller.js
+//= link controllers/mobile_menu_controller.js
+//= link controllers/datepicker_controller.js

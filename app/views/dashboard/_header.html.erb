@@ -40,7 +40,7 @@
         <summary class="dropdown-summary list-none inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
           Nova +
         </summary>
-        <div class="dropdown-menu absolute right-0 mt-1 w-48 shadow-lg z-10">
+        <div class="dropdown-menu absolute left-0 mt-1 w-48 shadow-lg z-10 lg:left-auto lg:right-0">
           <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
           <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
         </div>

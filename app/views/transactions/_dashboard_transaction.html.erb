@@ -1,5 +1,5 @@
-<article id="<%= dom_id(t, :dash) %>" class="flex items-center gap-4 px-4 py-3">
-  <div class="flex-1">
+<article id="<%= dom_id(t, :dash) %>" class="flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+  <div class="flex-1 w-full">
     <p class="font-medium text-slate-900"><%= t.title %></p>
     <p class="text-sm text-slate-500">
       <%= t.category&.name || "Sem categoria" %> · <%= l(t.occurred_on) %>
@@ -7,14 +7,26 @@
   </div>
   <% current_amount = t.monthly_amount_for(Date.current) %>
   <% installment_idx = t.installment_number_for(Date.current) %>
-  <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700' : 'text-amber-700' %>">
-    <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>
-    <% if installment_idx %>
-      <span class="ml-1 text-xs text-slate-500">(parc. <%= installment_idx %>/<%= t.installments %>)</span>
-    <% end %>
-  </p>
-  <div class="flex items-center gap-2">
-    <%= link_to "Editar", edit_transaction_path(t), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400" %>
-    <%= button_to "Excluir", transaction_path(t), method: :delete, data: { turbo_confirm: "Excluir esta transação?" }, class: "rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 focus:outline focus:outline-2 focus:outline-red-400" %>
+  <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
+    <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700' : 'text-amber-700' %>">
+      <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>
+      <% if installment_idx %>
+        <span class="ml-1 text-xs text-slate-500">(parc. <%= installment_idx %>/<%= t.installments %>)</span>
+      <% end %>
+    </p>
+    <div class="flex items-center gap-2">
+      <%= link_to edit_transaction_path(t), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-2 py-1.5 text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400 sm:px-3" do %>
+        <span class="sr-only sm:not-sr-only text-sm font-medium">Editar</span>
+        <svg class="h-4 w-4 sm:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M13.586 2.586a2 2 0 0 1 2.828 2.828L7.414 14.414a2 2 0 0 1-.879.51l-3 1a1 1 0 0 1-1.264-1.265l1-3a2 2 0 0 1 .51-.878L13.586 2.586Z"/>
+        </svg>
+      <% end %>
+      <%= button_to transaction_path(t), method: :delete, data: { turbo_confirm: "Excluir esta transação?" }, class: "rounded-md bg-red-600 px-2 py-1.5 text-white hover:bg-red-700 focus:outline focus:outline-2 focus:outline-red-400 sm:px-3" do %>
+        <span class="sr-only sm:not-sr-only text-sm font-medium">Excluir</span>
+        <svg class="h-4 w-4 sm:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 2.25a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 .75.75V3h3.25a.75.75 0 0 1 0 1.5h-.54l-.62 9.37A2.25 2.25 0 0 1 10.84 16h-1.68a2.25 2.25 0 0 1-2.25-2.13L6.29 4.5h-.54a.75.75 0 0 1 0-1.5H9V2.25Zm-1.2 2.25.6 9a.75.75 0 0 0 .75.7h1.7a.75.75 0 0 0 .75-.7l.6-9H7.8Z" clip-rule="evenodd"/>
+        </svg>
+      <% end %>
+    </div>
   </div>
 </article>

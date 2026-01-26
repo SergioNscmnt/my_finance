@@ -140,14 +140,40 @@ class TransactionsController < ApplicationController
     pie_values = [receita_total, despesa_total]
 
     current_month_expenses = transactions.select(&:expense?)
-    category_data = current_month_expenses
-                    .group_by { |t| t.category&.name || "Sem categoria" }
-                    .map { |name, txs| [name, txs.sum { |t| t.monthly_amount_for(Date.current) }] }
-                    .reject { |_name, total| total.zero? }
-                    .sort_by { |_name, total| -total }
-                    .first(6)
-    category_labels = category_data.map(&:first)
-    category_values = category_data.map(&:last)
+
+    totals = current_month_expenses
+               .group_by { |t| t.category&.name || "Sem categoria" }
+               .transform_values { |txs| txs.sum { |t| t.monthly_amount_for(Date.current) } }
+
+    # Inclui todas as categorias de despesa com 0, para manter barras e opções.
+    current_user.categories.expense.order(:name).pluck(:name).each { |name| totals[name] ||= 0 }
+    totals["Sem categoria"] ||= 0
+
+    filter = params[:category].presence
+    filter_name = nil
+    if filter
+      match = current_user.categories.expense.find { |c| c.name.downcase.include?(filter.downcase) }
+      filter_name = match&.name
+      totals[filter_name] ||= 0 if filter_name
+    end
+
+    ordered = totals.to_a.sort_by { |_name, total| -total }
+    selected = ordered.first(5)
+
+    if filter_name && selected.none? { |(name, _)| name == filter_name }
+      selected << [filter_name, totals[filter_name]]
+    end
+
+    if selected.size < 5
+      ordered.each do |entry|
+        next if selected.any? { |(name, _)| name == entry.first }
+        selected << entry
+        break if selected.size >= 5
+      end
+    end
+
+    category_labels = selected.map(&:first)
+    category_values = selected.map(&:last)
 
     {
       receita_total: receita_total,
@@ -162,6 +188,8 @@ class TransactionsController < ApplicationController
       pie_values: pie_values,
       category_labels: category_labels,
       category_values: category_values,
+      category_filter: params[:category].presence,
+      category_options: current_user.categories.expense.order(:name).pluck(:name),
       goals_count: current_user.respond_to?(:goals) ? current_user.goals.count : 0
     }
   end

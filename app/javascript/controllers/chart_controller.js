@@ -4,7 +4,8 @@ export default class extends Controller {
   static values = {
     type: String,
     labels: Array,
-    datasets: Array
+    datasets: Array,
+    axis: String
   }
 
   connect() {
@@ -18,6 +19,10 @@ export default class extends Controller {
 
   render() {
     const ctx = this.element.getContext("2d")
+
+    const indexAxis = this.hasAxisValue ? this.axisValue : "x"
+    const valueAxis = indexAxis === "y" ? "x" : "y"
+
     this.chart = new Chart(ctx, {
       type: this.typeValue,
       data: {
@@ -27,11 +32,16 @@ export default class extends Controller {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis,
         plugins: {
           legend: { position: "bottom" },
         },
         scales: this.typeValue === "doughnut" ? {} : {
-          y: { ticks: { callback: (value) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(value) } }
+          [valueAxis]: {
+            ticks: {
+              callback: (value) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(value)
+            }
+          }
         }
       }
     })

@@ -19,6 +19,9 @@ class DashboardController < ApplicationController
     # Metas (se existir associação)
     @goals_count = current_user.respond_to?(:goals) ? current_user.goals.count : 0
 
+    @category_filter  = params[:category].presence
+    @category_options = current_user.categories.expense.order(:name).pluck(:name)
+
     # Transações recentes para listas/estado vazio no dashboard
     @transactions = transactions.sort_by { |t| [t.occurred_on, t.created_at] }.reverse.first(10)
 
@@ -66,16 +69,41 @@ class DashboardController < ApplicationController
   end
 
   def top_expense_categories(transactions)
-    data = transactions
-             .select(&:expense?)
-             .group_by { |t| t.category&.name || "Sem categoria" }
-             .map { |name, txs| [name, txs.sum { |t| t.monthly_amount_for(Date.current) }] }
-             .reject { |_name, total| total.zero? }
-             .sort_by { |_name, total| -total }
-             .first(6)
-    return [[], []] if data.empty?
-    labels = data.map(&:first)
-    values = data.map(&:last)
+    expenses = transactions.select(&:expense?)
+
+    totals = expenses
+               .group_by { |t| t.category&.name || "Sem categoria" }
+               .transform_values { |txs| txs.sum { |t| t.monthly_amount_for(Date.current) } }
+
+    # Adiciona todas as categorias de despesa com valor 0 para encher o gráfico.
+    current_user.categories.expense.order(:name).pluck(:name).each { |name| totals[name] ||= 0 }
+    totals["Sem categoria"] ||= 0
+
+    filter = params[:category].presence
+    filter_name = nil
+    if filter
+      match = current_user.categories.expense.find { |c| c.name.downcase.include?(filter.downcase) }
+      filter_name = match&.name
+      totals[filter_name] ||= 0 if filter_name
+    end
+
+    ordered = totals.to_a.sort_by { |_name, total| -total }
+    selected = ordered.first(5)
+
+    if filter_name && selected.none? { |(name, _)| name == filter_name }
+      selected << [filter_name, totals[filter_name]]
+    end
+
+    if selected.size < 5
+      ordered.each do |entry|
+        next if selected.any? { |(name, _)| name == entry.first }
+        selected << entry
+        break if selected.size >= 5
+      end
+    end
+
+    labels = selected.map(&:first)
+    values = selected.map(&:last)
     [labels, values]
   end
 
