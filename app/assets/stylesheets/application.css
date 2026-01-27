@@ -24,6 +24,12 @@
   --field-bg: #fff;
   --field-text: #0f172a;             /* slate-900 */
 }
+.dark {
+  --field-border: 1px solid #334155; /* slate-700 */
+  --field-focus: 1px solid #38bdf8;  /* sky-400 */
+  --field-bg: #0f172a;               /* slate-900 */
+  --field-text: #e2e8f0;             /* slate-200 */
+}
 
 /* Inputs e dropdowns padronizados em todas as telas */
 input[type="text"],
@@ -63,6 +69,11 @@ select:focus {
   outline: 2px solid #bfdbfe; /* blue-200 halo */
   outline-offset: 1px;
 }
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  outline: 2px solid rgba(56, 189, 248, 0.35);
+}
 
 /* Ajuste consistente para selects múltiplos */
 select[multiple],
@@ -79,6 +90,12 @@ select:disabled {
   background: #f8fafc; /* slate-50 */
   color: #94a3b8;      /* slate-400 */
   cursor: not-allowed;
+}
+.dark input:disabled,
+.dark textarea:disabled,
+.dark select:disabled {
+  background: #0b1220; /* slate-950 */
+  color: #64748b;      /* slate-500 */
 }
 
 /* Oculta marcador padrão de <details>/<summary> para dropdown customizado */
@@ -105,6 +122,10 @@ details summary::-webkit-details-marker {
   background: #f8fafc;           /* slate-50 */
   padding-left: 1.1rem;
   color: #0f172a;                /* slate-900 */
+}
+.dark .dropdown-item:hover {
+  background: #0f172a;
+  color: #e2e8f0;
 }
 
 .dropdown-menu {
@@ -133,6 +154,14 @@ details summary::-webkit-details-marker {
 .dropdown-option:hover {
   border-color: #cbd5e1; /* slate-300 */
   background: #f8fafc; /* slate-50 */
+}
+.dark .dropdown-option {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.dark .dropdown-option:hover {
+  border-color: #475569;
+  background: #111827;
 }
 
 /* Versão slim para selects pontuais (ex.: filtro de período) */
@@ -167,16 +196,27 @@ details summary::-webkit-details-marker {
   border-color: #94a3b8 transparent transparent;
   margin-top: 0.25rem;
 }
+.dark .ts-wrapper.single .ts-control:after {
+  border-color: #94a3b8 transparent transparent;
+}
 .ts-dropdown {
   border: var(--field-border);
   border-radius: var(--field-radius);
   background: #f8fafc;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
 }
+.dark .ts-dropdown {
+  background: #0b1220;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.55);
+}
 .ts-dropdown .ts-dropdown-input {
   padding: 0.45rem;
   border-bottom: 1px solid #e2e8f0;
   background: #f1f5f9;
+}
+.dark .ts-dropdown .ts-dropdown-input {
+  border-bottom: 1px solid #1f2937;
+  background: #0f172a;
 }
 .ts-dropdown .ts-dropdown-input input {
   width: 100%;
@@ -190,6 +230,11 @@ details summary::-webkit-details-marker {
   line-height: 1.25rem;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
 }
+.dark .ts-dropdown .ts-dropdown-input input {
+  background: #0b1220;
+  color: #e2e8f0;
+  box-shadow: inset 0 1px 2px rgba(2, 6, 23, 0.5);
+}
 .ts-dropdown .option {
   padding: 0.4rem 0.75rem;
   font-size: 0.875rem;
@@ -199,10 +244,49 @@ details summary::-webkit-details-marker {
 .ts-dropdown .option:hover {
   background: #e2e8f0;
 }
+.dark .ts-dropdown .option {
+  color: #e2e8f0;
+}
+.dark .ts-dropdown .option.active,
+.dark .ts-dropdown .option:hover {
+  background: #1f2937;
+}
+.dark .ts-wrapper .ts-control,
+.dark .ts-wrapper.multi .ts-control,
+.dark .ts-wrapper.single .ts-control {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+.dark .ts-control input,
+.dark .ts-control .item,
+.dark .ts-control .item-input {
+  color: #e2e8f0 !important;
+}
+.dark .ts-wrapper.single .ts-control:after {
+  border-color: #94a3b8 transparent transparent !important;
+}
+.dark .ts-dropdown {
+  background: #0b1220 !important;
+  border-color: #334155 !important;
+}
+.dark .ts-dropdown .option {
+  color: #e2e8f0 !important;
+}
+.dark .ts-dropdown .option.active,
+.dark .ts-dropdown .option:hover {
+  background: #1f2937 !important;
+}
 
 /* Flatpickr: mantém cabeçalho acima do grid de dias e garante z-index alto */
 .flatpickr-calendar {
   z-index: 50; /* acima de inputs e dropdowns locais */
+}
+.dark .flatpickr-calendar {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.6);
+  color: #e2e8f0;
 }
 .flatpickr-calendar .flatpickr-months {
   position: relative;
@@ -211,15 +295,31 @@ details summary::-webkit-details-marker {
   background: #fff;
   margin-bottom: 4px;
 }
+.dark .flatpickr-calendar .flatpickr-months {
+  background: #0f172a;
+}
 .flatpickr-calendar .flatpickr-current-month .numInputWrapper,
 .flatpickr-calendar .flatpickr-monthDropdown-months {
   position: relative;
   z-index: 7;
   background: #fff;
 }
+.dark .flatpickr-calendar .flatpickr-current-month .numInputWrapper,
+.dark .flatpickr-calendar .flatpickr-monthDropdown-months {
+  background: #0f172a;
+}
 .flatpickr-calendar .flatpickr-weekdays {
   margin-top: 2px;
   background: #fff;
+}
+.dark .flatpickr-calendar .flatpickr-weekdays {
+  background: #0f172a;
+}
+.dark .flatpickr-calendar .flatpickr-weekday {
+  color: #94a3b8;
+}
+.dark .flatpickr-calendar .flatpickr-weekdays {
+  background: #0f172a;
 }
 
 /* Neutraliza o estilo global de inputs/selects dentro do flatpickr,
@@ -238,10 +338,43 @@ details summary::-webkit-details-marker {
   box-shadow: none;
   width: auto;
 }
+.dark .flatpickr-calendar input[type="text"],
+.dark .flatpickr-calendar input[type="number"],
+.dark .flatpickr-calendar select {
+  border: 1px solid #1f2937;
+  background: #0b1220;
+  color: #e2e8f0;
+}
 .flatpickr-calendar select:not([multiple]) {
   appearance: auto;
   background-image: none;
   padding-right: 1.5rem;
+}
+.dark .flatpickr-calendar .flatpickr-prev-month,
+.dark .flatpickr-calendar .flatpickr-next-month {
+  color: #cbd5e1;
+  fill: #cbd5e1;
+}
+.dark .flatpickr-calendar .flatpickr-day {
+  color: #e2e8f0;
+}
+.dark .flatpickr-calendar .flatpickr-day.today {
+  border-color: #38bdf8;
+}
+.dark .flatpickr-calendar .flatpickr-day:hover {
+  background: #1f2937;
+  border-color: #334155;
+}
+.dark .flatpickr-calendar .flatpickr-day.inRange {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.25);
+}
+.dark .flatpickr-calendar .flatpickr-day.selected,
+.dark .flatpickr-calendar .flatpickr-day.startRange,
+.dark .flatpickr-calendar .flatpickr-day.endRange {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: #f8fafc;
 }
 .flatpickr-calendar *,
 .flatpickr-calendar *::before,
@@ -281,6 +414,11 @@ details summary::-webkit-details-marker {
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
 }
+.dark .ts-dropdown .optgroup-header {
+  color: #cbd5f5;
+  background: #0f172a;
+  border-bottom: 1px solid #1f2937;
+}
 .ts-dropdown .option-item {
   display: flex;
   align-items: center;
@@ -297,6 +435,8 @@ details summary::-webkit-details-marker {
 }
 .ts-dropdown .badge-income { background-color: #ecfdf3; color: #047857; border: 1px solid #bbf7d0; }
 .ts-dropdown .badge-expense { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.dark .ts-dropdown .badge-income { background-color: #064e3b; color: #d1fae5; border: 1px solid #065f46; }
+.dark .ts-dropdown .badge-expense { background-color: #7c2d12; color: #ffedd5; border: 1px solid #9a3412; }
 
 /* Pagy pagination */
 .pagy-nav.pagination {
@@ -319,6 +459,11 @@ details summary::-webkit-details-marker {
   font-size: 0.85rem;
   line-height: 1;
 }
+.dark .pagy-nav .page {
+  border: 1px solid #1f2937;
+  background: #0f172a;
+  color: #cbd5e1;
+}
 .pagy-nav .page a {
   color: inherit;
   text-decoration: none;
@@ -328,14 +473,28 @@ details summary::-webkit-details-marker {
   color: #0f172a; /* slate-900 */
   background: #f8fafc; /* slate-50 */
 }
+.dark .pagy-nav .page:hover {
+  border-color: #334155;
+  color: #f8fafc;
+  background: #111827;
+}
 .pagy-nav .page.active {
   border-color: #10b981; /* emerald-500 */
   background: #ecfdf5; /* emerald-50 */
   color: #047857; /* emerald-700 */
   font-weight: 600;
 }
+.dark .pagy-nav .page.active {
+  border-color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
 .pagy-nav .page.disabled {
   color: #94a3b8; /* slate-400 */
   background: #f8fafc; /* slate-50 */
   cursor: not-allowed;
+}
+.dark .pagy-nav .page.disabled {
+  color: #64748b;
+  background: #0b1220;
 }

@@ -1,13 +1,13 @@
 <% data = local_assigns[:data] || @dashboard_data %>
 <section class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-semibold text-slate-900">Fluxo mensal</h3>
-      <%= form_with url: dashboard_path, method: :get, local: true, class: "flex items-center gap-2 text-xs text-slate-600" do %>
+  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Fluxo mensal</h3>
+      <%= form_with url: dashboard_path, method: :get, local: true, class: "flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400" do %>
         <label for="months" class="font-medium">Período</label>
         <%= select_tag :months,
               options_for_select([["1 mês",1],["3 meses",3],["6 meses",6],["9 meses",9],["1 ano",12],["2 anos",24],["3 anos",36]], data[:chart_months]),
-              class: "slim-select w-28 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 bg-white focus:border-blue-500 focus:outline-none",
+              class: "slim-select w-28 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 bg-white focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
               onchange: "this.form.submit()" %>
       <% end %>
     </div>
@@ -25,10 +25,10 @@
     </div>
   </article>
 
-  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-semibold text-slate-900">Composição</h3>
-      <span class="text-xs text-slate-500">Receita vs Despesa</span>
+  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Composição</h3>
+      <span class="text-xs text-slate-500 dark:text-slate-400">Receita vs Despesa</span>
     </div>
     <div class="h-60">
       <canvas
@@ -43,11 +43,11 @@
     </div>
   </article>
 
-  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-semibold text-slate-900">Top despesas</h3>
-      <div class="flex items-center gap-2 text-xs text-slate-600">
-        <span class="text-slate-500">por categoria</span>
+  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Top despesas</h3>
+      <div class="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+        <span class="text-slate-500 dark:text-slate-400">por categoria</span>
         <% categories = data[:category_options] || @category_options || [] %>
         <% selected_category = data[:category_filter] || @category_filter %>
         <%= form_with url: dashboard_path, method: :get, local: true, class: "flex items-center gap-2" do %>
@@ -55,7 +55,7 @@
           <%= select_tag :category,
                 options_for_select([["Todas", ""]] + categories.map { |c| [c, c] }, selected_category),
                 include_blank: false,
-                class: "slim-select w-40 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 bg-white focus:border-blue-500 focus:outline-none",
+                class: "slim-select w-40 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 bg-white focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
                 onchange: "this.form.requestSubmit()" %>
         <% end %>
       </div>

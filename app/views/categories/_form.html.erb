@@ -1,18 +1,18 @@
-<section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-  <h2 class="text-lg font-semibold text-slate-900 mb-3"><%= category.persisted? ? "Editar categoria" : "Nova categoria" %></h2>
-  <p class="text-sm text-slate-600 mb-4">Crie ou edite categorias para classificar receitas e despesas.</p>
+<section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+  <h2 class="text-lg font-semibold text-slate-900 mb-3 dark:text-slate-100"><%= category.persisted? ? "Editar categoria" : "Nova categoria" %></h2>
+  <p class="text-sm text-slate-600 mb-4 dark:text-slate-400">Crie ou edite categorias para classificar receitas e despesas.</p>
   <% frame_id = local_assigns[:frame_id] || "category_form" %>
 
   <%= form_with model: category, data: { turbo_frame: frame_id }, class: "grid gap-4 md:grid-cols-2" do |form| %>
     <div class="md:col-span-2 space-y-1">
-      <%= form.label :name, "Nome", class: "text-sm font-medium text-slate-700" %>
-      <%= form.text_field :name, required: true, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" %>
+      <%= form.label :name, "Nome", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+      <%= form.text_field :name, required: true, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
       <% if form.object.errors[:name].any? %>
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:name).first %></p>
       <% end %>
     </div>
     <div class="space-y-2">
-      <%= form.label :kind, "Tipo", class: "text-sm font-medium text-slate-700" %>
+      <%= form.label :kind, "Tipo", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
       <%= form.select :kind, [["Receita", :income], ["Despesa", :expense]], {},
         required: true,
         id: "category_kind_select",
@@ -22,10 +22,10 @@
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:kind).first %></p>
       <% end %>
     </div>
-    <div class="md:col-span-2 flex gap-2">
-      <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400" %>
+    <div class="md:col-span-2 flex flex-col gap-2 sm:flex-row">
+      <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400 w-full sm:w-auto" %>
       <% cancel_options = frame_id == "modal" ? { data: { action: "modal#close" } } : { data: { turbo_frame: frame_id } } %>
-      <%= link_to "Cancelar", frame_id == "modal" ? "#" : categories_path, { class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400" }.merge(cancel_options) %>
+      <%= link_to "Cancelar", frame_id == "modal" ? "#" : categories_path, { class: "inline-flex justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 w-full sm:w-auto text-center" }.merge(cancel_options) %>
     </div>
   <% end %>
 </section>

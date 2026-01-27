@@ -1,15 +1,15 @@
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
   <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div>
-      <h1 class="text-2xl font-semibold text-slate-900">Transações</h1>
-      <p class="text-sm text-slate-600">Controle suas receitas e despesas rapidamente.</p>
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Transações</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Controle suas receitas e despesas rapidamente.</p>
     </div>
-    <div class="relative">
+    <div class="relative w-full sm:w-auto">
       <details class="group" data-controller="dropdown">
-        <summary class="dropdown-summary list-none rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
+        <summary class="dropdown-summary list-none rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer w-full sm:w-auto text-center">
           Nova +
         </summary>
-        <div class="dropdown-menu absolute left-0 mt-1 w-48 shadow-lg z-10 lg:left-auto lg:right-0">
+        <div class="dropdown-menu absolute left-0 mt-1 w-full sm:w-48 shadow-lg z-10 lg:left-auto lg:right-0">
           <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
           <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
         </div>
@@ -22,14 +22,17 @@
   <% end %>
 
   <%= turbo_frame_tag "transactions" do %>
-    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 px-4 py-3">
-        <p class="font-semibold text-slate-900">Lista de transações</p>
-        <span class="text-sm text-slate-500"><%= @pagy&.count || @transactions.size %> itens</span>
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+        <p class="font-semibold text-slate-900 dark:text-slate-100">Lista de transações</p>
+        <span class="text-sm text-slate-500 dark:text-slate-400"><%= @pagy&.count || @transactions.size %> itens</span>
       </header>
-      <div class="overflow-x-auto">
+      <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <%= render partial: "transactions/dashboard_transaction", collection: @transactions, as: :t %>
+      </div>
+      <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
-          <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+          <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-300">
             <tr>
               <th class="px-4 py-3">Título</th>
               <th class="px-4 py-3">Tipo</th>
@@ -39,13 +42,13 @@
               <th class="px-4 py-3 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody id="transactions_list" class="divide-y divide-slate-100 bg-white">
+          <tbody id="transactions_list" class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
             <%= render @transactions %>
           </tbody>
         </table>
       </div>
       <% if @pagy&.pages.to_i > 1 %>
-        <div class="border-t border-slate-200 px-4 py-3 text-sm">
+        <div class="border-t border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
           <%= pagy_nav(@pagy, link_extra: 'data-turbo-frame="transactions"').html_safe %>
         </div>
       <% end %>

@@ -1,0 +1,25 @@
+<article id="<%= dom_id(category, :card) %>" class="flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+  <% is_expense = category.kind.to_sym == :expense %>
+  <% kind_label = is_expense ? "Despesa" : "Receita" %>
+  <div class="flex-1 w-full">
+    <div class="flex flex-wrap items-center gap-2">
+      <p class="font-medium text-slate-900 dark:text-slate-100"><%= category.name %></p>
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold <%= is_expense ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' %>">
+        <span class="h-2.5 w-2.5 rounded-full <%= is_expense ? 'bg-amber-500 dark:bg-amber-400' : 'bg-emerald-500 dark:bg-emerald-400' %>"></span>
+        <span class="uppercase tracking-wide"><%= kind_label %></span>
+      </span>
+    </div>
+  </div>
+  <div class="flex items-center gap-2 sm:justify-end">
+    <%= link_to edit_category_path(category), data: { turbo_frame: "modal" }, class: "inline-flex items-center justify-center rounded-md bg-blue-50 p-2 text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400 dark:bg-blue-900/30 dark:text-blue-200 dark:hover:bg-blue-900/50", aria: { label: "Editar" } do %>
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M13.586 2.586a2 2 0 0 1 2.828 2.828L7.414 14.414a2 2 0 0 1-.879.51l-3 1a1 1 0 0 1-1.264-1.265l1-3a2 2 0 0 1 .51-.878L13.586 2.586Z"/>
+      </svg>
+    <% end %>
+    <%= link_to category_path(category), data: { turbo_method: :delete, turbo_confirm: "Remover?" }, class: "inline-flex items-center justify-center rounded-md bg-red-600 p-2 text-white hover:bg-red-700 focus:outline focus:outline-2 focus:outline-red-400", aria: { label: "Excluir" } do %>
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M9 2.25a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 .75.75V3h3.25a.75.75 0 0 1 0 1.5h-.54l-.62 9.37A2.25 2.25 0 0 1 10.84 16h-1.68a2.25 2.25 0 0 1-2.25-2.13L6.29 4.5h-.54a.75.75 0 0 1 0-1.5H9V2.25Zm-1.2 2.25.6 9a.75.75 0 0 0 .75.7h1.7a.75.75 0 0 0 .75-.7l.6-9H7.8Z" clip-rule="evenodd"/>
+      </svg>
+    <% end %>
+  </div>
+</article>

@@ -4,16 +4,16 @@
 
 <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:flex-wrap">
   <div class="flex flex-col gap-2">
-    <p class="text-sm text-slate-600">Olá, <span class="font-semibold text-slate-900"><%= current_user.name %></span></p>
+    <p class="text-sm text-slate-600 dark:text-slate-400">Olá, <span class="font-semibold text-slate-900 dark:text-slate-100"><%= current_user.name %></span></p>
     <div class="flex items-center gap-2">
       <div>
-        <p class="text-sm text-slate-500">Saldo do mês</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Saldo do mês</p>
         <div class="flex items-center gap-2">
-          <p class="text-3xl font-semibold text-slate-900">
+          <p class="text-3xl font-semibold text-slate-900 dark:text-slate-100">
             <span data-privacy-target="value"><%= number_to_currency(balance) %></span>
           </p>
           <button type="button"
-                  class="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 focus:outline focus:outline-2 focus:outline-emerald-400"
+                  class="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 focus:outline focus:outline-2 focus:outline-emerald-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-800"
                   data-action="privacy#toggle"
                   data-privacy-target="trigger">
             <svg data-privacy-target="iconShow" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -34,18 +34,18 @@
       </p>
     <% end %>
   </div>
-  <div class="flex flex-wrap gap-2 items-center md:flex-nowrap md:gap-3">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
     <div class="relative">
       <details class="group" data-controller="dropdown">
-        <summary class="dropdown-summary list-none inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer">
+        <summary class="dropdown-summary list-none inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 cursor-pointer w-full sm:w-auto">
           Nova +
         </summary>
-        <div class="dropdown-menu absolute left-0 mt-1 w-48 shadow-lg z-10 lg:left-auto lg:right-0">
+        <div class="dropdown-menu absolute left-0 mt-1 w-full sm:w-48 shadow-lg z-10 lg:left-auto lg:right-0">
           <%= link_to "Receita", new_transaction_path(type: :income), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
           <%= link_to "Despesa", new_transaction_path(type: :expense), data: { turbo_frame: "modal", action: "click->dropdown#close" }, class: "dropdown-option" %>
         </div>
       </details>
     </div>
-    <%= link_to "Importar CSV", import_transactions_path, data: { turbo_frame: "modal" }, class: "inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400" rescue nil %>
+    <%= link_to "Importar CSV", import_transactions_path, data: { turbo_frame: "modal" }, class: "inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400 w-full sm:w-auto" rescue nil %>
   </div>
 </section>

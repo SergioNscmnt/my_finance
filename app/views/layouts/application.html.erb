@@ -8,47 +8,66 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <script>
+      (() => {
+        let storedTheme = null
+        try {
+          storedTheme = localStorage.getItem("myfinance-theme")
+        } catch (_) {}
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+        const theme = storedTheme || (prefersDark ? "dark" : "light")
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark")
+          document.addEventListener("DOMContentLoaded", () => {
+            if (document.body) document.body.classList.add("dark")
+          })
+        }
+      })();
+    </script>
+
+    <!-- Tom Select (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" />
+    <!-- Flatpickr (CDN) for datepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.5/dist/chart.umd.min.js"></script>
-    <!-- Tom Select (CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    <!-- Flatpickr (CDN) for datepicker -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <style>
       .badge-income { background-color: #ecfdf3; color: #047857; border: 1px solid #bbf7d0; }
       .badge-expense { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+      .dark .badge-income { background-color: #064e3b; color: #d1fae5; border: 1px solid #065f46; }
+      .dark .badge-expense { background-color: #7c2d12; color: #ffedd5; border: 1px solid #9a3412; }
     </style>
   </head>
 
-  <body class="bg-gray-50 text-gray-900">
+  <body class="bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100">
     <% auth_page = controller_name == "sessions" && action_name == "new" %>
 
     <% if auth_page %>
       <main class="min-h-screen flex items-center justify-center px-4 py-10">
         <div class="w-full max-w-5xl">
           <% flash.each do |type, message| %>
-            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"><%= message %></div>
+            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900/60 dark:bg-blue-900/30 dark:text-blue-100"><%= message %></div>
           <% end %>
           <%= yield %>
         </div>
       </main>
     <% else %>
       <div class="min-h-screen">
-        <nav class="bg-white shadow-sm" data-controller="mobile-menu">
+        <nav class="bg-white shadow-sm dark:bg-slate-900 dark:border-b dark:border-slate-800" data-controller="mobile-menu">
           <div class="max-w-5xl mx-auto px-4 py-4">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div class="flex items-center justify-between">
-                <%= link_to root_path, class: "flex items-center gap-1.5 font-semibold text-lg leading-none text-gray-900" do %>
+                <%= link_to root_path, class: "flex items-center gap-1.5 font-semibold text-lg leading-none text-gray-900 dark:text-slate-100" do %>
                   <%= image_tag "logo.svg", class: "h-12 w-12 shrink-0 align-middle", alt: "MyFinance logo" %>
                   <span class="leading-none">MyFinance</span>
                 <% end %>
                 <button type="button"
-                        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white p-2 text-slate-700 hover:bg-slate-50 hover:border-slate-300 lg:hidden"
+                        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white p-2 text-slate-700 hover:bg-slate-50 hover:border-slate-300 lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                         aria-label="Abrir menu"
                         data-action="click->mobile-menu#toggle">
                   <svg data-mobile-menu-target="iconOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
@@ -63,16 +82,30 @@
               <div class="hidden w-full flex-col items-start gap-3 lg:flex lg:flex-row lg:items-center lg:gap-4 lg:w-auto"
                    data-mobile-menu-target="panel">
                 <% if current_user %>
-                  <span class="text-sm text-slate-600 border-b-2 border-transparent pb-1">Olá, <span class="font-semibold text-slate-900"><%= current_user.name %></span></span>
-                  <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Minha conta", account_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Sair", session_path, data: { turbo_method: :delete }, class: "text-sm text-red-600 hover:text-red-700 border-b-2 border-transparent hover:border-red-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <span class="text-sm text-slate-600 dark:text-slate-300 border-b-2 border-transparent pb-1">Olá, <span class="font-semibold text-slate-900 dark:text-slate-100"><%= current_user.name %></span></span>
+                  <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Minha conta", account_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Sair", session_path, data: { turbo_method: :delete }, class: "text-sm text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border-b-2 border-transparent hover:border-red-500 pb-1 transition-colors w-full lg:w-auto" %>
                 <% else %>
-                  <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Criar conta", new_user_path, class: "text-sm text-gray-700 hover:text-emerald-700 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <%= link_to "Criar conta", new_user_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
                 <% end %>
+                <button type="button"
+                        class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        data-controller="theme"
+                        data-action="click->theme#toggle"
+                        data-theme-target="button"
+                        aria-label="Alternar tema">
+                  <svg data-theme-target="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                    <path d="M21.752 15.002A9.718 9.718 0 0 1 12 21.75 9.75 9.75 0 0 1 8.998 2.25a.75.75 0 0 1 .743 1.125A8.25 8.25 0 0 0 20.625 14.26a.75.75 0 0 1 1.127.742Z" />
+                  </svg>
+                  <svg data-theme-target="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 hidden">
+                    <path d="M12 6.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Zm0-4.5a.75.75 0 0 1 .75.75V4.5a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75Zm0 16.5a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75ZM4.5 12a.75.75 0 0 1 .75-.75H6.75a.75.75 0 0 1 0 1.5H5.25A.75.75 0 0 1 4.5 12Zm12 0a.75.75 0 0 1 .75-.75H18.75a.75.75 0 0 1 0 1.5H17.25A.75.75 0 0 1 16.5 12ZM6.22 6.22a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06L6.22 7.28a.75.75 0 0 1 0-1.06Zm9.44 9.44a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06ZM6.22 17.78a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm9.44-9.44a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 1 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Z" />
+                  </svg>
+                  <span data-theme-target="label">Modo claro</span>
+                </button>
               </div>
             </div>
           </div>
@@ -80,7 +113,7 @@
 
         <main class="max-w-5xl mx-auto px-4 py-6">
           <% flash.each do |type, message| %>
-            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"><%= message %></div>
+            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900/60 dark:bg-blue-900/30 dark:text-blue-100"><%= message %></div>
           <% end %>
           <%= yield %>
         </main>
@@ -91,8 +124,8 @@
     <div data-controller="modal" data-modal-open-class="is-open">
       <div data-modal-target="backdrop" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm hidden" data-action="click->modal#close"></div>
       <div data-modal-target="container" class="fixed inset-0 z-50 grid place-items-center px-4 py-8 pointer-events-none hidden">
-        <div class="relative w-full max-w-3xl pointer-events-auto overflow-visible rounded-2xl bg-white shadow-2xl border border-slate-200" data-modal-target="panel">
-          <button type="button" class="absolute right-3 top-3 rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-blue-400" aria-label="Fechar" data-action="modal#close">X</button>
+        <div class="relative w-full max-w-3xl pointer-events-auto overflow-visible rounded-2xl bg-white shadow-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-700" data-modal-target="panel">
+          <button type="button" class="absolute right-3 top-3 rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-blue-400 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" aria-label="Fechar" data-action="modal#close">X</button>
           <turbo-frame id="modal" data-modal-target="frame" data-action="turbo:frame-load->modal#open turbo:submit-end->modal#handleSubmit">
             <!-- Conteúdo carregado dinamicamente -->
           </turbo-frame>

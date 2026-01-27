@@ -1,21 +1,21 @@
 <article id="<%= dom_id(t, :dash) %>" class="flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
   <div class="flex-1 w-full">
-    <p class="font-medium text-slate-900"><%= t.title %></p>
-    <p class="text-sm text-slate-500">
+    <p class="font-medium text-slate-900 dark:text-slate-100"><%= t.title %></p>
+    <p class="text-sm text-slate-500 dark:text-slate-400">
       <%= t.category&.name || "Sem categoria" %> · <%= l(t.occurred_on) %>
     </p>
   </div>
   <% current_amount = t.monthly_amount_for(Date.current) %>
   <% installment_idx = t.installment_number_for(Date.current) %>
   <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
-    <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700' : 'text-amber-700' %>">
+    <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' %>">
       <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>
       <% if installment_idx %>
-        <span class="ml-1 text-xs text-slate-500">(parc. <%= installment_idx %>/<%= t.installments %>)</span>
+        <span class="ml-1 text-xs text-slate-500 dark:text-slate-400">(parc. <%= installment_idx %>/<%= t.installments %>)</span>
       <% end %>
     </p>
     <div class="flex items-center gap-2">
-      <%= link_to edit_transaction_path(t), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-2 py-1.5 text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400 sm:px-3" do %>
+      <%= link_to edit_transaction_path(t), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-2 py-1.5 text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400 dark:bg-blue-900/30 dark:text-blue-200 dark:hover:bg-blue-900/50 sm:px-3" do %>
         <span class="sr-only sm:not-sr-only text-sm font-medium">Editar</span>
         <svg class="h-4 w-4 sm:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M13.586 2.586a2 2 0 0 1 2.828 2.828L7.414 14.414a2 2 0 0 1-.879.51l-3 1a1 1 0 0 1-1.264-1.265l1-3a2 2 0 0 1 .51-.878L13.586 2.586Z"/>
