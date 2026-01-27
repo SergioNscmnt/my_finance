@@ -24,13 +24,24 @@ services:
       DATABASE_PASSWORD: f!n4nc31r0$
       DATABASE_NAME: my_finance_development
       DATABASE_NAME_TEST: my_finance_test
+      OLLAMA_URL: http://ollama:11434
     volumes:
       - .:/rails
     ports:
       - "3000:3000"
     depends_on:
       - db
+      - ollama
     platform: linux/amd64
-    
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+
 volumes:
   db_data:
+  ollama_data:

@@ -8,6 +8,7 @@ import PrivacyController from "./privacy_controller"
 import MobileMenuController from "./mobile_menu_controller"
 import DatepickerController from "./datepicker_controller"
 import ThemeController from "./theme_controller"
+import AiConsultantController from "./ai_consultant_controller"
 
 const application = Application.start()
 
@@ -23,3 +24,4 @@ application.register("privacy", PrivacyController)
 application.register("mobile-menu", MobileMenuController)
 application.register("datepicker", DatepickerController)
 application.register("theme", ThemeController)
+application.register("ai-consultant", AiConsultantController)
