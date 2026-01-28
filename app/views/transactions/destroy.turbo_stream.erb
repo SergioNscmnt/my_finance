@@ -1,5 +1,11 @@
 <%= turbo_stream.remove @transaction %>
-<%= turbo_stream.remove dom_id(@transaction, :dash) %>
+<%= turbo_stream.replace "dashboard_transactions" do %>
+  <turbo-frame id="dashboard_transactions">
+    <%= render "dashboard/transactions",
+          transactions_grouped: @dashboard_transactions_grouped,
+          list_label: @dashboard_transactions_label %>
+  </turbo-frame>
+<% end %>
 
 <%= turbo_stream.replace "dashboard-metrics" do %>
   <%= render "dashboard/metrics", data: @dashboard_data %>

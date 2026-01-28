@@ -2,14 +2,3 @@
 //= link_directory ../stylesheets .css
 //= link_tree ../builds
 //= link application.js
-//= link controllers/index.js
-//= link controllers/modal_controller.js
-//= link controllers/chart_controller.js
-//= link controllers/currency_controller.js
-//= link controllers/dropdown_controller.js
-//= link controllers/privacy_controller.js
-//= link controllers/tom_select_controller.js
-//= link controllers/mobile_menu_controller.js
-//= link controllers/datepicker_controller.js
-//= link controllers/theme_controller.js
-//= link controllers/ai_consultant_controller.js

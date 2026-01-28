@@ -2,8 +2,12 @@
   <%= render @transaction %>
 <% end %>
 
-<%= turbo_stream.prepend "dashboard_transactions" do %>
-  <%= render "transactions/dashboard_transaction", t: @transaction %>
+<%= turbo_stream.replace "dashboard_transactions" do %>
+  <turbo-frame id="dashboard_transactions">
+    <%= render "dashboard/transactions",
+          transactions_grouped: @dashboard_transactions_grouped,
+          list_label: @dashboard_transactions_label %>
+  </turbo-frame>
 <% end %>
 
 <%= turbo_stream.replace "transaction_form" do %>

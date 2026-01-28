@@ -8,9 +8,6 @@ Rails.application.routes.draw do
   resources :categories, except: %i[show]
   resources :transactions, except: %i[show]
   get "dashboard", to: "dashboard#index"
-  namespace :ai do
-    resource :consultant, only: :create, controller: "consultant"
-  end
 
   root "dashboard#index"
 end

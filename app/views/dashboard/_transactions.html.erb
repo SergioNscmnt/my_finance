@@ -1,0 +1,25 @@
+<section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+  <header class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+    <p class="font-semibold text-slate-900 dark:text-slate-100">Transações por mês</p>
+    <span class="text-sm text-slate-500 dark:text-slate-400"><%= list_label %></span>
+  </header>
+
+  <div id="dashboard_transactions_list" class="max-h-[520px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+    <% if transactions_grouped.blank? %>
+      <div class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
+        Nenhuma transação encontrada no período.
+      </div>
+    <% else %>
+      <% transactions_grouped.each do |(month, items)| %>
+        <div class="sticky top-0 z-10 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+          <%= l(month, format: "%B %Y") %>
+        </div>
+        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+          <% items.each do |t| %>
+            <%= render "transactions/dashboard_transaction", t: t %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</section>

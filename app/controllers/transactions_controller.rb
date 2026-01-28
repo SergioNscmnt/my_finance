@@ -31,6 +31,7 @@ class TransactionsController < ApplicationController
     @transaction = current_user.transactions.new(transaction_params)
     if @transaction.save
       @dashboard_data = dashboard_data
+      @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
       respond_to do |format|
         format.turbo_stream { render :create }
         format.html { redirect_to transactions_path, notice: "Transação criada" }
@@ -49,6 +50,7 @@ class TransactionsController < ApplicationController
   def update
     if @transaction.update(transaction_params)
       @dashboard_data = dashboard_data
+      @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
       respond_to do |format|
         format.turbo_stream { render :update }
         format.html { redirect_to transactions_path, notice: "Transação atualizada" }
@@ -63,6 +65,7 @@ class TransactionsController < ApplicationController
   def destroy
     @transaction.destroy
     @dashboard_data = dashboard_data
+    @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
     respond_to do |format|
       format.turbo_stream { render :destroy }
       format.html { redirect_to transactions_path, notice: "Transação removida" }
@@ -100,14 +103,6 @@ class TransactionsController < ApplicationController
     @pagy, @transactions = pagy(scope, items: 10)
     @transaction  ||= current_user.transactions.new(kind: params[:type] || params[:kind] || :income)
     @categories   ||= current_user.categories.order(:name)
-  end
-
-  # Converte string para Date de forma segura, retornando nil em caso de erro.
-  def safe_date(raw)
-    return nil if raw.blank?
-    Date.parse(raw)
-  rescue ArgumentError
-    nil
   end
 
   def turbo_modal?
@@ -192,5 +187,57 @@ class TransactionsController < ApplicationController
       category_options: current_user.categories.expense.order(:name).pluck(:name),
       goals_count: current_user.respond_to?(:goals) ? current_user.goals.count : 0
     }
+  end
+
+  def dashboard_transactions_payload
+    from_date, to_date = list_range
+
+    scope = current_user.transactions.includes(:category)
+    scope = scope.where(occurred_on: from_date..) if from_date
+    scope = scope.where(occurred_on: ..to_date) if to_date
+    if params[:type].present? && Transaction.kinds.key?(params[:type])
+      scope = scope.where(kind: params[:type])
+    end
+
+    transactions = scope.order(occurred_on: :desc, created_at: :desc).to_a
+    grouped = transactions.group_by { |t| t.occurred_on.beginning_of_month }
+    grouped = grouped.sort_by { |month, _| month }.reverse
+
+    [grouped, list_label(from_date, to_date)]
+  end
+
+  def list_range
+    from_date = safe_date(params[:from])
+    to_date = safe_date(params[:to])
+
+    if from_date.nil? && to_date.nil?
+      to_date = Date.current
+      from_date = to_date - 1.month
+    end
+
+    if from_date && to_date && from_date > to_date
+      from_date, to_date = to_date, from_date
+    end
+
+    [from_date, to_date]
+  end
+
+  def list_label(from_date, to_date)
+    if params[:from].blank? && params[:to].blank?
+      "Últimos 30 dias"
+    elsif from_date && to_date
+      "Período: #{from_date.strftime('%d/%m/%Y')} — #{to_date.strftime('%d/%m/%Y')}"
+    elsif from_date
+      "A partir de #{from_date.strftime('%d/%m/%Y')}"
+    else
+      "Até #{to_date.strftime('%d/%m/%Y')}"
+    end
+  end
+
+  def safe_date(raw)
+    return nil if raw.blank?
+    Date.parse(raw)
+  rescue ArgumentError
+    nil
   end
 end

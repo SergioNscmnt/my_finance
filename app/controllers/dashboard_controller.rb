@@ -22,8 +22,17 @@ class DashboardController < ApplicationController
     @category_filter  = params[:category].presence
     @category_options = current_user.categories.expense.order(:name).pluck(:name)
 
-    # Transações recentes para listas/estado vazio no dashboard
-    @transactions = transactions.sort_by { |t| [t.occurred_on, t.created_at] }.reverse.first(10)
+    @list_from, @list_to = list_range
+    @list_label = list_label(@list_from, @list_to)
+
+    list_scope = current_user.transactions.includes(:category)
+    list_scope = list_scope.where(occurred_on: @list_from..) if @list_from
+    list_scope = list_scope.where(occurred_on: ..@list_to) if @list_to
+    if params[:type].present? && Transaction.kinds.key?(params[:type])
+      list_scope = list_scope.where(kind: params[:type])
+    end
+    @transactions = list_scope.order(occurred_on: :desc, created_at: :desc).to_a
+    @transactions_grouped = group_by_month(@transactions)
 
     build_chart_data(transactions)
   end
@@ -33,11 +42,6 @@ class DashboardController < ApplicationController
   # Aplica filtros seguros de data (from/to) e reutiliza em todos os cálculos.
   def scoped_transactions
     scope = current_user.transactions
-    from_date = safe_date(params[:from])
-    to_date   = safe_date(params[:to])
-
-    scope = scope.where(occurred_on: from_date..) if from_date
-    scope = scope.where(occurred_on: ..to_date)   if to_date
     scope
   end
 
@@ -47,6 +51,39 @@ class DashboardController < ApplicationController
     Date.parse(raw)
   rescue ArgumentError
     nil
+  end
+
+  def list_range
+    from_date = safe_date(params[:from])
+    to_date = safe_date(params[:to])
+
+    if from_date.nil? && to_date.nil?
+      to_date = Date.current
+      from_date = to_date - 1.month
+    end
+
+    if from_date && to_date && from_date > to_date
+      from_date, to_date = to_date, from_date
+    end
+
+    [from_date, to_date]
+  end
+
+  def list_label(from_date, to_date)
+    if params[:from].blank? && params[:to].blank?
+      "Últimos 30 dias"
+    elsif from_date && to_date
+      "Período: #{from_date.strftime('%d/%m/%Y')} — #{to_date.strftime('%d/%m/%Y')}"
+    elsif from_date
+      "A partir de #{from_date.strftime('%d/%m/%Y')}"
+    else
+      "Até #{to_date.strftime('%d/%m/%Y')}"
+    end
+  end
+
+  def group_by_month(transactions)
+    grouped = transactions.group_by { |t| t.occurred_on.beginning_of_month }
+    grouped.sort_by { |month, _| month }.reverse
   end
 
   def build_chart_data(transactions)

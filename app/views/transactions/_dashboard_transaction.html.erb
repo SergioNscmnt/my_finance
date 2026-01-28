@@ -5,8 +5,8 @@
       <%= t.category&.name || "Sem categoria" %> · <%= l(t.occurred_on) %>
     </p>
   </div>
-  <% current_amount = t.monthly_amount_for(Date.current) %>
-  <% installment_idx = t.installment_number_for(Date.current) %>
+  <% current_amount = t.display_amount %>
+  <% installment_idx = t.installment_number_for(t.occurred_on) %>
   <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
     <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' %>">
       <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>

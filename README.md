@@ -57,21 +57,5 @@ Credenciais seed (alteráveis via `SEED_USER_EMAIL`/`SEED_USER_PASSWORD`):
 ## Testes
 Ainda não configurado (sugestão: adicionar RSpec ou Minitest + system tests).
 
-## Consultora IA local (Ollama)
-Integração simples para testes locais usando Ollama (sem custo por requisicao).
-
-Passos sugeridos:
-1) Instale o Ollama e inicie o servidor local
-2) Baixe um modelo:
-   ```bash
-   ollama pull llama3.1:8b
-   ```
-3) Suba a aplicacao normalmente e use o painel "Consultora IA" no dashboard.
-
-Variaveis opcionais:
-- `OLLAMA_URL` (padrao: `http://localhost:11434`)
-- `OLLAMA_MODEL` (padrao: `llama3.1:8b`)
-- `OLLAMA_TIMEOUT` (segundos, padrao: `15`)
-
 ## Suporte
 Ajuste variáveis no `docker-compose.yml` ou `.env.example`. Issues/PRs são bem-vindos.
