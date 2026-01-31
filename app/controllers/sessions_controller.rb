@@ -15,6 +15,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
+    
     reset_session
     redirect_to new_session_path, notice: "Sessão encerrada"
   end

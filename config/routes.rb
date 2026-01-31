@@ -8,6 +8,12 @@ Rails.application.routes.draw do
   resources :categories, except: %i[show]
   resources :transactions, except: %i[show]
   get "dashboard", to: "dashboard#index"
+  get "investments/portfolio", to: "investments#portfolio"
+  get "investments/analysis", to: "investments#analysis"
+  get "investments/planning", to: "investments#planning"
+  get "investments/income", to: "investments#income"
+  get "investments/dividends", to: "investments#dividends"
+  get "investments/integrations", to: "investments#integrations"
 
   root "dashboard#index"
 end
