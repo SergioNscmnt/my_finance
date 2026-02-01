@@ -15,5 +15,10 @@ Rails.application.routes.draw do
   get "investments/dividends", to: "investments#dividends"
   get "investments/integrations", to: "investments#integrations"
 
+  resources :assets do
+    resources :investment_transactions, except: %i[index show]
+    resources :dividends, except: %i[index show]
+  end
+
   root "dashboard#index"
 end

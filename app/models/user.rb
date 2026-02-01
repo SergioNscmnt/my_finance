@@ -3,6 +3,10 @@ class User < ApplicationRecord
 
   has_many :categories, dependent: :destroy
   has_many :transactions, dependent: :destroy
+  has_many :wallets, dependent: :destroy
+  has_many :assets, through: :wallets
+  has_many :investment_transactions, through: :wallets
+  has_many :dividends, through: :wallets
 
   after_create :ensure_default_categories
 
