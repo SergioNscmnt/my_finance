@@ -25,6 +25,7 @@ default_categories = {
     "Educação",
     "Contas e Serviços",
     "Compras",
+    "Animais de Estimação",
     "Investimentos (despesa)",
     "Outras despesas"
   ]
@@ -36,52 +37,101 @@ default_categories.each do |kind, names|
   end
 end
 
-def seed_installments!(user, category_name:, start_date:, max_installments:)
-  category = Category.find_by!(user: user, kind: :expense, name: category_name)
-
-  1.upto(max_installments) do |installments|
-    total_amount = 1000 + (installments * 50)
-    per_installment = (total_amount.to_f / installments).round(2)
-    title_base = "Compra cartão #{installments}x"
-
-    1.upto(installments) do |i|
-      occurred_on = start_date.next_month(i - 1)
-      Transaction.find_or_create_by!(
-        user: user,
-        category: category,
-        kind: :expense,
-        title: "#{title_base} (#{i}/#{installments})",
-        amount: per_installment,
-        occurred_on: occurred_on
-      )
-    end
-  end
+def find_category!(user, kind, name)
+  Category.find_by!(user: user, kind: kind, name: name)
 end
 
-seed_installments!(
-  user,
-  category_name: "Compras",
-  start_date: Date.current.beginning_of_month,
-  max_installments: 48
-)
+def seed_installment_purchase!(user, category_name:, occurred_on:, total_amount:, installments:)
+  category = find_category!(user, :expense, category_name)
+
+  Transaction.find_or_create_by!(
+    user: user,
+    category: category,
+    kind: :expense,
+    title: "Compra parcelada #{installments}x",
+    amount: total_amount,
+    occurred_on: occurred_on,
+    payment_method: :credit_card,
+    installments: installments
+  )
+end
+
+def seed_expense!(user, category_name:, title:, amount:, occurred_on:, payment_method: :cash)
+  category = find_category!(user, :expense, category_name)
+
+  Transaction.find_or_create_by!(
+    user: user,
+    category: category,
+    kind: :expense,
+    title: title,
+    amount: amount,
+    occurred_on: occurred_on,
+    payment_method: payment_method,
+    installments: 1
+  )
+end
+
+def seed_income!(user, category_name:, title:, amount:, occurred_on:, payment_method: :pix)
+  category = find_category!(user, :income, category_name)
+
+  Transaction.find_or_create_by!(
+    user: user,
+    category: category,
+    kind: :income,
+    title: title,
+    amount: amount,
+    occurred_on: occurred_on,
+    payment_method: payment_method,
+    installments: 1
+  )
+end
+
+month_start = Date.current.beginning_of_month
+
+seed_installment_purchase!(user, category_name: "Compras", occurred_on: month_start - 2.months, total_amount: 1800.0, installments: 6)
+seed_installment_purchase!(user, category_name: "Lazer", occurred_on: month_start - 5.months, total_amount: 2400.0, installments: 10)
+
+seed_expense!(user, category_name: "Moradia", title: "Aluguel", amount: 2500.0, occurred_on: month_start - 6.months)
+seed_expense!(user, category_name: "Contas e Serviços", title: "Conta de luz", amount: 320.45, occurred_on: month_start - 6.months + 3.days)
+seed_expense!(user, category_name: "Alimentação", title: "Supermercado", amount: 680.30, occurred_on: month_start - 5.months + 8.days)
+seed_expense!(user, category_name: "Transporte", title: "Combustível", amount: 410.0, occurred_on: month_start - 4.months + 5.days, payment_method: :pix)
+seed_expense!(user, category_name: "Saúde", title: "Farmácia", amount: 155.9, occurred_on: month_start - 3.months + 12.days)
+seed_expense!(user, category_name: "Educação", title: "Curso online", amount: 289.0, occurred_on: month_start - 2.months + 18.days, payment_method: :pix)
+seed_expense!(user, category_name: "Compras", title: "Eletrônicos", amount: 950.0, occurred_on: month_start - 1.month + 6.days, payment_method: :credit_card)
+seed_expense!(user, category_name: "Lazer", title: "Restaurantes", amount: 220.0, occurred_on: month_start + 2.days)
+seed_expense!(user, category_name: "Saúde", title: "Consulta médica", amount: 280.0, occurred_on: month_start + 9.days, payment_method: :pix)
+seed_expense!(user, category_name: "Alimentação", title: "Feira", amount: 210.0, occurred_on: month_start - 1.month + 12.days)
+seed_expense!(user, category_name: "Contas e Serviços", title: "Internet", amount: 129.9, occurred_on: month_start - 1.month + 3.days)
+seed_expense!(user, category_name: "Transporte", title: "App mobilidade", amount: 95.0, occurred_on: month_start - 2.months + 9.days)
+seed_expense!(user, category_name: "Moradia", title: "Condomínio", amount: 420.0, occurred_on: month_start - 3.months + 5.days)
+seed_expense!(user, category_name: "Lazer", title: "Cinema", amount: 78.0, occurred_on: month_start - 4.months + 16.days)
+seed_expense!(user, category_name: "Educação", title: "Livro técnico", amount: 145.0, occurred_on: month_start - 5.months + 22.days)
+seed_expense!(user, category_name: "Saúde", title: "Exames", amount: 360.0, occurred_on: month_start - 6.months + 18.days)
+seed_expense!(user, category_name: "Alimentação", title: "Restaurante", amount: 190.0, occurred_on: month_start + 5.days, payment_method: :pix)
+seed_expense!(user, category_name: "Compras", title: "Vestuário", amount: 320.0, occurred_on: month_start + 11.days, payment_method: :credit_card)
+
+seed_income!(user, category_name: "Salário", title: "Salário", amount: 7500.0, occurred_on: month_start - 6.months + 2.days)
+seed_income!(user, category_name: "Salário", title: "Salário", amount: 7600.0, occurred_on: month_start - 3.months + 2.days)
+seed_income!(user, category_name: "Freelance", title: "Projeto extra", amount: 1800.0, occurred_on: month_start - 2.months + 20.days)
+seed_income!(user, category_name: "Salário", title: "Salário", amount: 7800.0, occurred_on: month_start + 1.day)
 
 wallet = user.wallets.find_or_create_by!(name: "Principal") do |w|
   w.currency = "BRL"
 end
 
 assets = [
-  { name: "Petrobras PN", ticker: "PETR4", asset_type: :stock },
-  { name: "Itaúsa PN", ticker: "ITSA4", asset_type: :stock },
-  { name: "FII Kinea Renda Imobiliária", ticker: "KNRI11", asset_type: :fii },
-  { name: "Tesouro Selic 2029", ticker: "LFT2029", asset_type: :fixed_income },
-  { name: "Bitcoin", ticker: "BTC", asset_type: :crypto }
+  { name: "Apple Inc.", ticker: "AAPL", asset_type: :stock, currency: "USD" },
+  { name: "Microsoft Corporation", ticker: "MSFT", asset_type: :stock, currency: "USD" },
+  { name: "NVIDIA Corporation", ticker: "NVDA", asset_type: :stock, currency: "USD" },
+  { name: "SPDR S&P 500 ETF Trust", ticker: "SPY", asset_type: :fund, currency: "USD" },
+  { name: "Bitcoin", ticker: "BTC", asset_type: :crypto, currency: "USD" }
 ]
 
 seed_assets = assets.map do |attrs|
   wallet.assets.find_or_create_by!(ticker: attrs[:ticker]) do |asset|
     asset.name = attrs[:name]
     asset.asset_type = attrs[:asset_type]
-    asset.currency = "BRL"
+    asset.currency = attrs[:currency] || "USD"
   end
 end
 
@@ -108,32 +158,89 @@ def seed_dividend!(wallet:, asset:, kind:, amount:, paid_on:, reinvested: false)
   )
 end
 
-base_date = Date.current.beginning_of_year
+def seed_massive_backed_portfolio!(wallet:, seed_assets:)
+  market_data = MassiveApi::MarketDataService.new
 
-seed_assets.each do |asset|
-  case asset.ticker
-  when "PETR4"
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 120, price: 32.15, fees: 8.5, occurred_on: base_date + 12.days)
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 80, price: 34.10, fees: 6.0, occurred_on: base_date + 80.days)
-    seed_dividend!(wallet: wallet, asset: asset, kind: :dividend, amount: 210.45, paid_on: base_date + 120.days)
-  when "ITSA4"
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 200, price: 10.55, fees: 5.0, occurred_on: base_date + 20.days)
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 150, price: 11.20, fees: 5.0, occurred_on: base_date + 110.days)
-    seed_dividend!(wallet: wallet, asset: asset, kind: :dividend, amount: 55.25, paid_on: base_date + 150.days)
-  when "KNRI11"
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 30, price: 160.70, fees: 7.5, occurred_on: base_date + 40.days)
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 20, price: 167.20, fees: 7.5, occurred_on: base_date + 100.days)
-    seed_dividend!(wallet: wallet, asset: asset, kind: :dividend, amount: 98.40, paid_on: base_date + 130.days)
-    seed_dividend!(wallet: wallet, asset: asset, kind: :dividend, amount: 102.30, paid_on: base_date + 160.days)
-  when "LFT2029"
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 1.5, price: 1000.00, fees: 0, occurred_on: base_date + 10.days)
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 1.0, price: 1025.00, fees: 0, occurred_on: base_date + 200.days)
-    seed_dividend!(wallet: wallet, asset: asset, kind: :interest, amount: 32.80, paid_on: base_date + 210.days)
-  when "BTC"
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 0.12, price: 180_000.00, fees: 15.0, occurred_on: base_date + 60.days)
-    seed_investment_transaction!(wallet: wallet, asset: asset, kind: :buy, quantity: 0.08, price: 200_000.00, fees: 12.0, occurred_on: base_date + 170.days)
+  if market_data.enabled?
+    seed_assets.each_with_index do |asset, index|
+      quote = market_data.quote_for(asset)
+      market_price = quote[:market_price].to_d
+      next if market_price <= 0
+
+      quantity = if asset.crypto?
+                   BigDecimal((0.03 + (index * 0.01)).round(4).to_s)
+                 else
+                   BigDecimal((8 + (index * 3)).to_s)
+                 end
+
+      first_buy_date = Date.current - (120 - index * 7).days
+      second_buy_date = Date.current - (45 - index * 4).days
+      buy_price_1 = (market_price * 0.92).round(6)
+      buy_price_2 = (market_price * 0.97).round(6)
+
+      seed_investment_transaction!(
+        wallet: wallet,
+        asset: asset,
+        kind: :buy,
+        quantity: quantity,
+        price: buy_price_1,
+        fees: (quantity * 0.05).round(2),
+        occurred_on: first_buy_date
+      )
+      seed_investment_transaction!(
+        wallet: wallet,
+        asset: asset,
+        kind: :buy,
+        quantity: (quantity / 2).round(6),
+        price: buy_price_2,
+        fees: (quantity * 0.04).round(2),
+        occurred_on: second_buy_date
+      )
+
+      next if asset.crypto?
+
+      seed_dividend!(
+        wallet: wallet,
+        asset: asset,
+        kind: :dividend,
+        amount: (market_price * 0.01).round(2),
+        paid_on: Date.current - (30 - index * 2).days
+      )
+    end
+
+    report = MassiveApi::DividendSyncService.new(wallet: wallet).call
+    puts "Massive seed sync de proventos: #{report[:synced]} sincronizados, #{report[:skipped]} ignorados, #{report[:errors]} erros"
+    return
+  end
+
+  # Fallback deterministic para ambiente sem chave API.
+  seed_assets.each_with_index do |asset, index|
+    base_price = asset.crypto? ? BigDecimal("45000") : BigDecimal((100 + (index * 40)).to_s)
+    quantity = asset.crypto? ? BigDecimal("0.05") : BigDecimal((10 + index * 2).to_s)
+
+    seed_investment_transaction!(
+      wallet: wallet,
+      asset: asset,
+      kind: :buy,
+      quantity: quantity,
+      price: base_price,
+      fees: 2.5,
+      occurred_on: Date.current - (100 - index * 5).days
+    )
+
+    next if asset.crypto?
+
+    seed_dividend!(
+      wallet: wallet,
+      asset: asset,
+      kind: :dividend,
+      amount: (base_price * 0.008).round(2),
+      paid_on: Date.current - (20 - index).days
+    )
   end
 end
+
+seed_massive_backed_portfolio!(wallet: wallet, seed_assets: seed_assets)
 
 positions = Investments::PositionCalculator.new(wallet: wallet).call
 invested_total = positions.sum(&:invested_amount).to_d
@@ -174,6 +281,7 @@ end
 
 allocation = Investments::AllocationCalculator.new(positions: positions).call
 allocation.each do |asset_class, share|
+  next if share.to_d <= 0
   wallet.allocation_targets.find_or_create_by!(asset_class: asset_class) do |target|
     target.target_percentage = (share * 100).round(2)
   end

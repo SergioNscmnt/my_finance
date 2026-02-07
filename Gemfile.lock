@@ -154,6 +154,7 @@ GEM
     nio4r (2.7.5)
     nokogiri (1.17.2-x86_64-linux)
       racc (~> 1.4)
+    pagy (6.5.0)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -161,7 +162,6 @@ GEM
       date
       stringio
     public_suffix (6.0.2)
-    pagy (6.5.0)
     puma (7.2.0)
       nio4r (~> 2.0)
     racc (1.8.1)

@@ -34,6 +34,7 @@ class DashboardController < ApplicationController
     @transactions = list_scope.order(occurred_on: :desc, created_at: :desc).to_a
     @transactions_grouped = group_by_month(@transactions)
 
+    load_budget_planner_data
     build_chart_data(transactions)
   end
 
@@ -163,5 +164,17 @@ class DashboardController < ApplicationController
     series_months.index_with do |month|
       transactions.sum { |t| t.monthly_impact(month) }
     end
+  end
+
+  def load_budget_planner_data
+    @category_budget = current_user.category_budgets.new
+    @budget_categories = current_user.categories.expense.order(:name)
+    @category_budgets = current_user.category_budgets.includes(:category).joins(:category).order("categories.name ASC")
+
+    @planned_budget_total = @category_budgets.sum(:amount)
+    @available_after_budget = @balance - @planned_budget_total
+
+    @budget_labels = @category_budgets.map { |budget| budget.category.name }
+    @budget_values = @category_budgets.map { |budget| budget.amount.to_f }
   end
 end

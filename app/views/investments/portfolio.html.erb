@@ -1,4 +1,4 @@
-<div class="space-y-6">
+  <div class="space-y-6">
   <div>
     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Investimentos</p>
     <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Carteira</h1>
@@ -10,11 +10,13 @@
   <% asset_class_labels = { "Stock" => "Ações", "Fii" => "FIIs", "Fixed income" => "Renda fixa", "Crypto" => "Criptoativos", "Fund" => "Fundos" } %>
   <div class="grid gap-4 lg:grid-cols-3">
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <p class="text-xs text-slate-500 dark:text-slate-400">Patrimônio total</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Patrimônio atual (com cotação)</p>
       <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-        <%= number_to_currency(@performance[:invested_total]) %>
+        <%= number_to_currency(@performance[:market_value_total].positive? ? @performance[:market_value_total] : @performance[:invested_total]) %>
       </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Valor investido consolidado na carteira.</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Investido: <%= number_to_currency(@performance[:invested_total]) %>
+      </p>
     </div>
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Alocação por classe</p>
@@ -41,6 +43,10 @@
         <span class="<%= @performance[:realized_profit].to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>">
           <%= number_to_currency(@performance[:realized_profit]) %>
         </span>
+        · P/L não realizado:
+        <span class="<%= @performance[:unrealized_profit].to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>">
+          <%= number_to_currency(@performance[:unrealized_profit]) %>
+        </span>
       </p>
     </div>
   </div>
@@ -48,28 +54,105 @@
   <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
     <div class="flex items-center justify-between">
       <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Posições</h2>
-      <span class="text-xs text-slate-500 dark:text-slate-400"><%= @positions.size %> ativos</span>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-500 dark:text-slate-400">
+          <%= @positions.size %> ativos ·
+          cotações: <%= @integration_status[:quoted_assets] %>/<%= @integration_status[:total_assets] %>
+        </span>
+        <%= link_to "Comprar", new_investments_buy_path, data: { turbo_frame: "modal" }, class: "rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
+      </div>
     </div>
-    <div class="mt-4 overflow-x-auto">
+    <div class="mt-4 space-y-3 md:hidden">
+      <% if @enriched_positions.empty? %>
+        <div class="rounded-xl border border-slate-200 px-4 py-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          Nenhuma posição cadastrada ainda.
+        </div>
+      <% else %>
+        <% @enriched_positions.each do |entry| %>
+          <% position = entry.position %>
+          <% history = @history_by_asset_id[position.asset.id] || { available: false, points: [], trend: :flat } %>
+          <article class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+            <div class="mb-3 border-b border-slate-100 pb-2 dark:border-slate-800">
+              <div class="text-sm font-semibold text-slate-900 dark:text-slate-100"><%= position.asset.ticker %></div>
+              <div class="text-xs text-slate-500 dark:text-slate-400"><%= position.asset.name %></div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between"><span class="text-slate-500 dark:text-slate-400">Quantidade</span><span class="font-medium text-slate-800 dark:text-slate-100"><%= position.quantity %></span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-500 dark:text-slate-400">Preço médio</span><span class="font-medium text-slate-800 dark:text-slate-100"><%= number_to_currency(position.avg_price) %></span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-500 dark:text-slate-400">Preço atual</span><span class="font-medium text-slate-800 dark:text-slate-100"><%= entry.market_price ? number_to_currency(entry.market_price) : "-" %></span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-500 dark:text-slate-400">Investido</span><span class="font-medium text-slate-800 dark:text-slate-100"><%= number_to_currency(position.invested_amount) %></span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-500 dark:text-slate-400">Valor atual</span><span class="font-medium text-slate-800 dark:text-slate-100"><%= entry.current_value ? number_to_currency(entry.current_value) : "-" %></span></div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500 dark:text-slate-400">P/L não realizado</span>
+                <% if entry.unrealized_profit %>
+                  <span class="font-medium <%= entry.unrealized_profit.to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>"><%= number_to_currency(entry.unrealized_profit) %></span>
+                <% else %>
+                  <span class="font-medium text-slate-800 dark:text-slate-100">-</span>
+                <% end %>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Lucro realizado</span>
+                <span class="font-medium <%= position.realized_profit.to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>"><%= number_to_currency(position.realized_profit) %></span>
+              </div>
+            </div>
+
+            <div class="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+              <div class="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Histórico</div>
+              <% if history[:available] && history[:points].size > 1 %>
+                <% points = history[:points] %>
+                <% min = points.min %>
+                <% max = points.max %>
+                <% width = 220.0 %>
+                <% height = 48.0 %>
+                <% coords = points.each_with_index.map do |value, idx|
+                     x = (idx.to_f / (points.size - 1)) * width
+                     y = if max == min
+                           height / 2.0
+                         else
+                           height - ((value - min) / (max - min) * height)
+                         end
+                     "#{x.round(2)},#{y.round(2)}"
+                   end.join(" ") %>
+                <% line_color = history[:trend] == :down ? "#dc2626" : "#16a34a" %>
+                <svg width="100%" height="48" viewBox="0 0 220 48" preserveAspectRatio="none" aria-label="Histórico">
+                  <polyline points="<%= coords %>" fill="none" stroke="<%= line_color %>" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              <% else %>
+                <span class="text-xs text-slate-400">Sem histórico disponível</span>
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="mt-4 hidden overflow-x-auto md:block">
       <table class="min-w-full text-left text-xs text-slate-600 dark:text-slate-300">
         <thead class="uppercase tracking-wide text-slate-400">
           <tr>
-            <th class="py-2 pr-4">Ativo</th>
-            <th class="py-2 pr-4">Quantidade</th>
-            <th class="py-2 pr-4">Preço médio</th>
-            <th class="py-2 pr-4">Investido</th>
-            <th class="py-2">Lucro realizado</th>
+            <th class="py-2 pr-4 cursor-help" title="Ticker e nome do ativo na carteira.">Ativo</th>
+            <th class="py-2 pr-4 cursor-help" title="Quantidade total em custodia para o ativo.">Quantidade</th>
+            <th class="py-2 pr-4 cursor-help" title="Preco medio ponderado das compras, considerando taxas.">Preço médio</th>
+            <th class="py-2 pr-4 cursor-help" title="Ultima cotacao obtida pela integracao com a Massive API.">Preço atual</th>
+            <th class="py-2 pr-4 cursor-help" title="Capital efetivamente alocado no ativo (custo de aquisicao).">Investido</th>
+            <th class="py-2 pr-4 cursor-help" title="Valor da posicao no mercado: quantidade x preco atual.">Valor atual</th>
+            <th class="py-2 pr-4 cursor-help" title="Resultado potencial se liquidar agora: valor atual menos valor investido.">P/L não realizado</th>
+            <th class="py-2 pr-4 cursor-help" title="Resultado ja concretizado em vendas anteriores do ativo.">Lucro realizado</th>
+            <th class="py-2 cursor-help" title="Mini gráfico do comportamento recente do preço de mercado.">Histórico</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-          <% if @positions.empty? %>
+          <% if @enriched_positions.empty? %>
             <tr>
-              <td colspan="5" class="py-4 text-sm text-slate-500 dark:text-slate-400">
+              <td colspan="9" class="py-4 text-sm text-slate-500 dark:text-slate-400">
                 Nenhuma posição cadastrada ainda.
               </td>
             </tr>
           <% else %>
-            <% @positions.each do |position| %>
+            <% @enriched_positions.each do |entry| %>
+              <% position = entry.position %>
+              <% history = @history_by_asset_id[position.asset.id] || { available: false, points: [], trend: :flat } %>
               <tr>
                 <td class="py-2 pr-4">
                   <div class="font-semibold text-slate-900 dark:text-slate-100"><%= position.asset.ticker %></div>
@@ -77,11 +160,46 @@
                 </td>
                 <td class="py-2 pr-4"><%= position.quantity %></td>
                 <td class="py-2 pr-4"><%= number_to_currency(position.avg_price) %></td>
+                <td class="py-2 pr-4"><%= entry.market_price ? number_to_currency(entry.market_price) : "-" %></td>
                 <td class="py-2 pr-4"><%= number_to_currency(position.invested_amount) %></td>
+                <td class="py-2 pr-4"><%= entry.current_value ? number_to_currency(entry.current_value) : "-" %></td>
+                <td class="py-2 pr-4">
+                  <% if entry.unrealized_profit %>
+                    <span class="<%= entry.unrealized_profit.to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>">
+                      <%= number_to_currency(entry.unrealized_profit) %>
+                    </span>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
                 <td class="py-2">
                   <span class="<%= position.realized_profit.to_d.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>">
                     <%= number_to_currency(position.realized_profit) %>
                   </span>
+                </td>
+                <td class="py-2">
+                  <% if history[:available] && history[:points].size > 1 %>
+                    <% points = history[:points] %>
+                    <% min = points.min %>
+                    <% max = points.max %>
+                    <% width = 110.0 %>
+                    <% height = 28.0 %>
+                    <% coords = points.each_with_index.map do |value, idx|
+                         x = (idx.to_f / (points.size - 1)) * width
+                         y = if max == min
+                               height / 2.0
+                             else
+                               height - ((value - min) / (max - min) * height)
+                             end
+                         "#{x.round(2)},#{y.round(2)}"
+                       end.join(" ") %>
+                    <% line_color = history[:trend] == :down ? "#dc2626" : "#16a34a" %>
+                    <svg width="110" height="28" viewBox="0 0 110 28" aria-label="Histórico">
+                      <polyline points="<%= coords %>" fill="none" stroke="<%= line_color %>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  <% else %>
+                    <span class="text-slate-400">-</span>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

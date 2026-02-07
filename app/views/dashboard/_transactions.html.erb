@@ -4,7 +4,10 @@
     <span class="text-sm text-slate-500 dark:text-slate-400"><%= list_label %></span>
   </header>
 
-  <div id="dashboard_transactions_list" class="max-h-[520px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+  <% grouped_items = transactions_grouped.present? ? transactions_grouped.to_h : {} %>
+  <% total_items = grouped_items.values.sum { |items| items.size } %>
+  <% scroll_class = total_items > 10 ? "max-h-[520px] overflow-y-auto" : "" %>
+  <div id="dashboard_transactions_list" class="<%= [scroll_class, "divide-y divide-slate-100 dark:divide-slate-800"].reject(&:blank?).join(" ") %>">
     <% if transactions_grouped.blank? %>
       <div class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
         Nenhuma transação encontrada no período.

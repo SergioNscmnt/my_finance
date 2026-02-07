@@ -27,6 +27,18 @@
       } %>
     </div>
 
+    <div id="dashboard-budget-planner">
+      <%= render "dashboard/budget_planner",
+            category_budget: @category_budget,
+            budget_categories: @budget_categories,
+            category_budgets: @category_budgets,
+            balance: @balance,
+            planned_budget_total: @planned_budget_total,
+            available_after_budget: @available_after_budget,
+            budget_labels: @budget_labels,
+            budget_values: @budget_values %>
+    </div>
+
     <!-- Filtros com Turbo para não recarregar a página -->
     <section class="overflow-x-auto">
       <turbo-frame id="filters">
