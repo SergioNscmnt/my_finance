@@ -7,6 +7,11 @@ Rails.application.routes.draw do
 
   resources :categories, except: %i[show]
   resources :category_budgets, only: %i[edit create update destroy]
+  resources :credit_card_invoices, only: [] do
+    member do
+      patch :pay
+    end
+  end
   resources :transactions, except: %i[show]
   get "dashboard", to: "dashboard#index"
   get "investments/portfolio", to: "investments#portfolio"

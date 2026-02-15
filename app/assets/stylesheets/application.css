@@ -296,6 +296,11 @@ details summary::-webkit-details-marker {
   justify-content: space-between;
   gap: 0.5rem;
 }
+.ts-control .option-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .ts-dropdown .badge {
   display: inline-flex;
   align-items: center;
@@ -304,10 +309,22 @@ details summary::-webkit-details-marker {
   font-size: 0.7rem;
   font-weight: 600;
 }
+.ts-control .badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
 .ts-dropdown .badge-income { background-color: #ecfdf3; color: #047857; border: 1px solid #bbf7d0; }
 .ts-dropdown .badge-expense { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.ts-dropdown .badge-bank { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.ts-control .badge-bank { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 .dark .ts-dropdown .badge-income { background-color: #064e3b; color: #d1fae5; border: 1px solid #065f46; }
 .dark .ts-dropdown .badge-expense { background-color: #7c2d12; color: #ffedd5; border: 1px solid #9a3412; }
+.dark .ts-dropdown .badge-bank { background-color: #172554; color: #bfdbfe; border: 1px solid #1d4ed8; }
+.dark .ts-control .badge-bank { background-color: #172554; color: #bfdbfe; border: 1px solid #1d4ed8; }
 
 /* Flatpickr header fix (month/year overlapping weekdays) */
 .flatpickr-calendar .flatpickr-months .flatpickr-month {

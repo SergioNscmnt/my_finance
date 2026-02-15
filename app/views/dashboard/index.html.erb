@@ -3,7 +3,12 @@
   <main class="mx-auto max-w-6xl px-4 py-6 space-y-6" data-controller="privacy">
     <!-- Saldo e ações principais -->
     <div id="dashboard-header">
-      <%= render "dashboard/header", data: { balance: @balance, monthly_change: @monthly_change } %>
+      <%= render "dashboard/header", data: {
+        balance: @balance,
+        monthly_change: @monthly_change,
+        current_month_credit_card_invoices: @current_month_credit_card_invoices,
+        credit_card_due_soon_invoices: @credit_card_due_soon_invoices
+      } %>
     </div>
 
     <div id="dashboard-metrics">

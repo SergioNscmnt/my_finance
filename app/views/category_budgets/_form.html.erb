@@ -4,7 +4,13 @@
   <div class="space-y-1">
     <%= f.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
     <%= f.select :category_id,
-          options_from_collection_for_select(budget_categories, :id, :name, category_budget.category_id),
+          options_for_select(
+            budget_categories.map do |category|
+              label = category.card_bank.present? ? "#{category.name} (#{category.card_bank})" : category.name
+              [label, category.id]
+            end,
+            category_budget.category_id
+          ),
           { include_blank: "Selecione uma categoria" },
           class: "tom-select w-full",
           data: { controller: "tom-select", placeholder: "Selecione uma categoria" } %>

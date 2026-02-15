@@ -88,7 +88,8 @@ class CategoryBudgetsController < ApplicationController
     end
 
     @planned_budget_total = @category_budgets.sum(:amount)
-    @available_after_budget = @balance - @planned_budget_total
+    # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
+    @available_after_budget = @balance
     @budget_labels = @category_budgets.map { |budget| budget.category.name }
     @budget_values = @category_budgets.map { |budget| budget.amount.to_f }
   end

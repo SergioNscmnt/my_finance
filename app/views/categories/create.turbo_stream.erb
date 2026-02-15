@@ -1,3 +1,7 @@
-<%= turbo_stream.prepend "categories" do %>
-  <%= render @category %>
+<%= turbo_stream.replace "categories" do %>
+  <%= turbo_frame_tag "categories" do %>
+    <%= render "categories/list", categories: @categories, pagy: @pagy %>
+  <% end %>
 <% end %>
+
+<%= turbo_stream.replace "categories-count", "#{@pagy&.count || @categories.count} categorias" %>

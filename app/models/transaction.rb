@@ -21,7 +21,7 @@ class Transaction < ApplicationRecord
   # Retorna o valor que impacta o mês informado.
   def monthly_amount_for(date)
     month = date.to_date.beginning_of_month
-    start_month = occurred_on.beginning_of_month
+    start_month = billing_start_month
 
     if credit_card? && installments.to_i > 1
       end_month = start_month + (installments - 1).months
@@ -44,10 +44,17 @@ class Transaction < ApplicationRecord
   def installment_number_for(date = Date.current)
     return nil unless credit_card? && installments.to_i > 1
     month = date.to_date.beginning_of_month
-    start_month = occurred_on.beginning_of_month
+    start_month = billing_start_month
     end_month = start_month + (installments - 1).months
     return nil if month < start_month || month > end_month
     (month.year * 12 + month.month) - (start_month.year * 12 + start_month.month) + 1
+  end
+
+  def billing_start_month
+    return occurred_on.beginning_of_month unless credit_card?
+    return occurred_on.beginning_of_month unless category&.credit_card?
+
+    category.billing_month_for(occurred_on)
   end
 
   private

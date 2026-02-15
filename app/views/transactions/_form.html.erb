@@ -82,6 +82,7 @@
       <select name="transaction[category_id]" id="transaction_category_select"
               class="tom-select w-full"
               data-controller="tom-select"
+              data-show-bank-badge="true"
               data-placeholder="Buscar categoria">
         <% if transaction.category_id.blank? %>
           <option></option>
@@ -91,14 +92,14 @@
         <% if show_income %>
           <optgroup label="Receitas">
             <% (grouped_categories["income"] || []).each do |cat| %>
-              <option value="<%= cat.id %>" data-kind="income" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
+              <option value="<%= cat.id %>" data-kind="income" data-bank="<%= cat.card_bank %>" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
             <% end %>
           </optgroup>
         <% end %>
         <% if show_expense %>
           <optgroup label="Despesas">
             <% (grouped_categories["expense"] || []).each do |cat| %>
-              <option value="<%= cat.id %>" data-kind="expense" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
+              <option value="<%= cat.id %>" data-kind="expense" data-bank="<%= cat.card_bank %>" <%= "selected" if cat.id == transaction.category_id %>><%= cat.name %></option>
             <% end %>
           </optgroup>
         <% end %>

@@ -8,6 +8,16 @@
         <span class="h-2.5 w-2.5 rounded-full <%= is_expense ? 'bg-amber-500 dark:bg-amber-400' : 'bg-emerald-500 dark:bg-emerald-400' %>"></span>
         <span class="uppercase tracking-wide"><%= kind_label %></span>
       </span>
+      <% if category.credit_card? %>
+        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+          Cartão: fecha dia <%= category.statement_closing_day %>, vence dia <%= category.statement_due_day %>
+        </span>
+        <% if category.card_bank.present? %>
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            <%= category.card_bank %>
+          </span>
+        <% end %>
+      <% end %>
     </div>
   </div>
   <div class="flex items-center gap-2 sm:justify-end">

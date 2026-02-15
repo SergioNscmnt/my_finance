@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   has_many :categories, dependent: :destroy
   has_many :category_budgets, dependent: :destroy
+  has_many :credit_card_invoices, dependent: :destroy
   has_many :transactions, dependent: :destroy
   has_many :wallets, dependent: :destroy
   has_many :assets, through: :wallets

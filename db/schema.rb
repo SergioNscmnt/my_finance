@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_07_173000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_15_113000) do
   create_table "allocation_targets", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.integer "asset_class", null: false
@@ -39,7 +39,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_173000) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id", "name"], name: "index_categories_on_user_id_and_name", unique: true
+    t.boolean "credit_card", default: false, null: false
+    t.integer "statement_closing_day"
+    t.integer "statement_due_day"
+    t.integer "reminder_days_before_due", default: 5, null: false
+    t.string "card_bank"
+    t.index ["user_id", "card_bank"], name: "index_categories_on_user_id_and_card_bank", unique: true
+    t.index ["user_id", "name"], name: "index_categories_on_user_id_and_name"
     t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
@@ -52,6 +58,23 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_173000) do
     t.index ["category_id"], name: "index_category_budgets_on_category_id"
     t.index ["user_id", "category_id"], name: "index_category_budgets_on_user_id_and_category_id", unique: true
     t.index ["user_id"], name: "index_category_budgets_on_user_id"
+  end
+
+  create_table "credit_card_invoices", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "category_id", null: false
+    t.date "billing_month", null: false
+    t.date "due_on", null: false
+    t.decimal "total_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id", "billing_month"], name: "index_credit_card_invoices_on_category_id_and_billing_month", unique: true
+    t.index ["category_id"], name: "index_credit_card_invoices_on_category_id"
+    t.index ["user_id", "due_on"], name: "index_credit_card_invoices_on_user_id_and_due_on"
+    t.index ["user_id", "status"], name: "index_credit_card_invoices_on_user_id_and_status"
+    t.index ["user_id"], name: "index_credit_card_invoices_on_user_id"
   end
 
   create_table "dividends", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -152,6 +175,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_07_173000) do
   add_foreign_key "categories", "users"
   add_foreign_key "category_budgets", "categories"
   add_foreign_key "category_budgets", "users"
+  add_foreign_key "credit_card_invoices", "categories"
+  add_foreign_key "credit_card_invoices", "users"
   add_foreign_key "dividends", "assets"
   add_foreign_key "dividends", "wallets"
   add_foreign_key "investment_goals", "wallets"

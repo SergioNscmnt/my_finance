@@ -1,5 +1,14 @@
 <tr id="<%= dom_id(category) %>" class="hover:bg-slate-50 dark:hover:bg-slate-800">
-  <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100"><%= category.name %></td>
+  <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">
+    <div class="flex flex-wrap items-center gap-2">
+      <span><%= category.name %></span>
+      <% if category.credit_card? %>
+        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+          <%= category.card_bank.presence || "Cartão" %> | fecha <%= category.statement_closing_day %> | vence <%= category.statement_due_day %>
+        </span>
+      <% end %>
+    </div>
+  </td>
   <% is_expense = category.kind.to_sym == :expense %>
   <% kind_label = is_expense ? "Despesa" : "Receita" %>
   <% badge_classes = is_expense ? "bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-900" : "bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-900" %>

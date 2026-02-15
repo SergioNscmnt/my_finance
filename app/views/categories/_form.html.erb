@@ -22,6 +22,49 @@
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:kind).first %></p>
       <% end %>
     </div>
+
+    <div class="md:col-span-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+      <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+        <%= form.check_box :credit_card, class: "rounded border-slate-300 text-blue-600 focus:ring-blue-500" %>
+        Categoria de cartão de crédito
+      </label>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Se ativado, o app usa fechamento, vencimento e alerta de fatura para compras no cartão.</p>
+
+      <div class="mt-3 grid gap-3 md:grid-cols-3">
+        <div class="space-y-1 md:col-span-3">
+          <%= form.label :card_bank, "Banco do cartão", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= form.select :card_bank,
+                options_for_select(Category::CARD_BANK_OPTIONS, form.object.card_bank),
+                { include_blank: "Selecione o banco" },
+                class: "tom-select w-full",
+                data: { controller: "tom-select", placeholder: "Selecione o banco" } %>
+          <% if form.object.errors[:card_bank].any? %>
+            <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:card_bank).first %></p>
+          <% end %>
+        </div>
+        <div class="space-y-1">
+          <%= form.label :statement_closing_day, "Dia de fechamento", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= form.number_field :statement_closing_day, min: 1, max: 31, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+          <% if form.object.errors[:statement_closing_day].any? %>
+            <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:statement_closing_day).first %></p>
+          <% end %>
+        </div>
+        <div class="space-y-1">
+          <%= form.label :statement_due_day, "Dia de vencimento", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= form.number_field :statement_due_day, min: 1, max: 31, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+          <% if form.object.errors[:statement_due_day].any? %>
+            <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:statement_due_day).first %></p>
+          <% end %>
+        </div>
+        <div class="space-y-1">
+          <%= form.label :reminder_days_before_due, "Alerta (dias antes)", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= form.number_field :reminder_days_before_due, min: 0, max: 30, class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+          <% if form.object.errors[:reminder_days_before_due].any? %>
+            <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:reminder_days_before_due).first %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
     <div class="md:col-span-2 flex flex-col gap-2 sm:flex-row">
       <%= form.submit "Salvar", class: "inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400 w-full sm:w-auto" %>
       <% cancel_options = frame_id == "modal" ? { data: { action: "modal#close" } } : { data: { turbo_frame: frame_id } } %>

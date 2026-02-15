@@ -12,7 +12,12 @@
       <div class="md:col-span-6">
         <%= f.label :category_id, "Categoria", class: "mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300" %>
         <%= f.select :category_id,
-              options_from_collection_for_select(budget_categories, :id, :name),
+              options_for_select(
+                budget_categories.map do |category|
+                  label = category.card_bank.present? ? "#{category.name} (#{category.card_bank})" : category.name
+                  [label, category.id]
+                end
+              ),
               include_blank: "Selecione uma categoria",
               class: "tom-select w-full",
               data: { controller: "tom-select", placeholder: "Selecione uma categoria" } %>
@@ -55,33 +60,50 @@
             <% progress = progress_by_category_id.fetch(budget.category_id, 0).to_f %>
             <% over_budget = remaining_amount.negative? %>
             <% progress_width = [[progress, 0].max, 100].min %>
-            <div class="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700">
-              <div class="flex items-center justify-between gap-3">
-                <span class="truncate text-sm font-medium text-slate-700 dark:text-slate-200"><%= budget.category.name %></span>
-                <span class="text-sm font-semibold <%= over_budget ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>" data-privacy-target="value">
+            <div class="rounded-lg border border-slate-200 px-3 py-3 dark:border-slate-700">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 break-words"><%= budget.category.name %></p>
+                    <% if budget.category.card_bank.present? %>
+                      <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                        <%= budget.category.card_bank %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+                <span class="text-base font-semibold <%= over_budget ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>" data-privacy-target="value">
                   <%= over_budget ? "-#{number_to_currency(remaining_amount.abs)}" : number_to_currency(remaining_amount) %>
                 </span>
               </div>
-              <div class="mt-1 grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+
+              <div class="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-2 sm:gap-2">
                 <span>Planejado: <strong data-privacy-target="value"><%= number_to_currency(budget.amount) %></strong></span>
                 <span>Gasto no mês: <strong data-privacy-target="value"><%= number_to_currency(spent_amount) %></strong></span>
               </div>
+
               <div class="mt-2">
                 <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                   <div class="h-full rounded-full <%= over_budget ? 'bg-red-500' : 'bg-emerald-500' %>" style="width: <%= progress_width %>%"></div>
                 </div>
               </div>
-              <div class="mt-2 flex items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+
+              <div class="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-2 sm:gap-3">
                 <span>
-                  <%= over_budget ? "Excedido em #{number_to_currency(remaining_amount.abs)}" : "Restante #{number_to_currency(remaining_amount)}" %>
+                  <% if over_budget %>
+                    Excedido em <span data-privacy-target="value"><%= number_to_currency(remaining_amount.abs) %></span>
+                  <% else %>
+                    Restante <span data-privacy-target="value"><%= number_to_currency(remaining_amount) %></span>
+                  <% end %>
                 </span>
-                <span><%= progress.round(1) %>% do limite usado</span>
+                <span class="sm:text-right"><%= progress.round(1) %>% do limite usado</span>
               </div>
-              <div class="mt-2 flex items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
-                <span><%= share %>% do total planejado</span>
-                <div class="flex items-center gap-2">
-                  <%= link_to "Editar", edit_category_budget_path(budget), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
-                  <%= link_to "Remover", category_budget_path(budget), data: { turbo_method: :delete, turbo_confirm: "Remover orçamento planejado desta categoria?" }, class: "rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 dark:border-red-900/70 dark:text-red-300 dark:hover:bg-red-900/20" %>
+
+              <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span class="text-xs text-slate-600 dark:text-slate-300"><%= share %>% do total planejado</span>
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                  <%= link_to "Editar", edit_category_budget_path(budget), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 text-center hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
+                  <%= link_to "Remover", category_budget_path(budget), data: { turbo_method: :delete, turbo_confirm: "Remover orçamento planejado desta categoria?" }, class: "rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 text-center hover:bg-red-50 dark:border-red-900/70 dark:text-red-300 dark:hover:bg-red-900/20" %>
                 </div>
               </div>
             </div>

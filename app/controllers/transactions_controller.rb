@@ -186,9 +186,23 @@ class TransactionsController < ApplicationController
     end
 
     planned_budget_total = category_budgets.sum(:amount)
-    available_after_budget = balance - planned_budget_total
+    # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
+    available_after_budget = balance
     budget_labels = category_budgets.map { |budget| budget.category.name }
     budget_values = category_budgets.map { |budget| budget.amount.to_f }
+
+    CreditCardInvoiceSyncer.new(current_user, transactions: transactions).sync!
+    invoices_scope = current_user.credit_card_invoices.includes(:category)
+    current_month = Date.current.beginning_of_month
+    current_month_credit_card_invoices = invoices_scope.where(billing_month: current_month).order(:due_on).to_a
+    credit_card_due_soon_invoices = invoices_scope
+                                    .where(status: %i[open overdue])
+                                    .order(:due_on)
+                                    .to_a
+                                    .select do |invoice|
+      reminder_days = invoice.category.reminder_days_before_due.to_i
+      invoice.due_on.between?(Date.current, Date.current + reminder_days.days)
+    end
 
     {
       receita_total: receita_total,
@@ -215,7 +229,9 @@ class TransactionsController < ApplicationController
       budget_values: budget_values,
       budget_spent_by_category_id: budget_spent_by_category_id,
       budget_remaining_by_category_id: budget_remaining_by_category_id,
-      budget_progress_by_category_id: budget_progress_by_category_id
+      budget_progress_by_category_id: budget_progress_by_category_id,
+      current_month_credit_card_invoices: current_month_credit_card_invoices,
+      credit_card_due_soon_invoices: credit_card_due_soon_invoices
     }
   end
 

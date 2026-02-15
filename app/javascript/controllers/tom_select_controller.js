@@ -7,6 +7,7 @@ export default class extends Controller {
 
     const placeholder = this.element.dataset.placeholder || ""
     const remoteUrl = this.element.dataset.remoteUrl
+    const showBankBadge = this.element.dataset.showBankBadge === "true"
 
     const config = {
       placeholder: placeholder,
@@ -20,7 +21,13 @@ export default class extends Controller {
           const badgeClass = kind === "expense" ? "badge-expense" : "badge-income"
           const label = kind === "expense" ? "Despesa" : kind === "income" ? "Receita" : (kind || "").toString().toUpperCase()
           const badge = label ? `<span class="badge ${badgeClass}">${label}</span>` : ""
-          return `<div class="option option-item"><span>${escape(data.text)}</span>${badge}</div>`
+          const bankBadge = showBankBadge && data.bank ? `<span class="badge badge-bank">${escape(data.bank)}</span>` : ""
+          return `<div class="option option-item"><span>${escape(data.text)}</span>${bankBadge}${badge}</div>`
+        },
+        item: (data, escape) => {
+          if (!data.value) return `<div>${escape(data.text || "")}</div>`
+          const bankBadge = showBankBadge && data.bank ? `<span class="badge badge-bank">${escape(data.bank)}</span>` : ""
+          return `<div class="option-item"><span>${escape(data.text)}</span>${bankBadge}</div>`
         }
       }
     }

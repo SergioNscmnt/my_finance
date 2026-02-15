@@ -31,6 +31,7 @@ class DashboardController < ApplicationController
     @transactions_grouped = group_by_month(@transactions)
 
     load_budget_planner_data(transactions)
+    load_credit_card_invoice_data(transactions)
     build_chart_data(transactions)
   end
 
@@ -107,7 +108,7 @@ class DashboardController < ApplicationController
 
   def build_monthly_series(transactions)
     months_ranges = transactions.map do |t|
-      start_month = t.occurred_on.beginning_of_month
+      start_month = t.billing_start_month
       end_month   = start_month + (t.installments - 1).months
       [start_month, end_month]
     end
@@ -153,9 +154,31 @@ class DashboardController < ApplicationController
     end
 
     @planned_budget_total = @category_budgets.sum(:amount)
-    @available_after_budget = @balance - @planned_budget_total
+    # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
+    @available_after_budget = @balance
 
     @budget_labels = @category_budgets.map { |budget| budget.category.name }
     @budget_values = @category_budgets.map { |budget| budget.amount.to_f }
+  end
+
+  def load_credit_card_invoice_data(transactions)
+    CreditCardInvoiceSyncer.new(current_user, transactions: transactions).sync!
+
+    current_month = Date.current.beginning_of_month
+    invoices_scope = current_user.credit_card_invoices.includes(:category)
+
+    @current_month_credit_card_invoices = invoices_scope
+                                          .where(billing_month: current_month)
+                                          .order(:due_on)
+                                          .to_a
+
+    @credit_card_due_soon_invoices = invoices_scope
+                                     .where(status: %i[open overdue])
+                                     .order(:due_on)
+                                     .to_a
+                                     .select do |invoice|
+      reminder_days = invoice.category.reminder_days_before_due.to_i
+      invoice.due_on.between?(Date.current, Date.current + reminder_days.days)
+    end
   end
 end
