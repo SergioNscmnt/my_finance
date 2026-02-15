@@ -1,0 +1,16 @@
+<%= turbo_stream.replace "dashboard-budget-planner" do %>
+  <div id="dashboard-budget-planner">
+    <%= render "dashboard/budget_planner",
+          category_budget: @category_budget,
+          budget_categories: @budget_categories,
+          category_budgets: @category_budgets,
+          balance: @balance,
+          planned_budget_total: @planned_budget_total,
+          available_after_budget: @available_after_budget,
+          budget_labels: @budget_labels,
+          budget_values: @budget_values,
+          budget_spent_by_category_id: @budget_spent_by_category_id,
+          budget_remaining_by_category_id: @budget_remaining_by_category_id,
+          budget_progress_by_category_id: @budget_progress_by_category_id %>
+  </div>
+<% end %>

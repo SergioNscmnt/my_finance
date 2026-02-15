@@ -31,7 +31,11 @@
     </div>
     <div class="mt-4 space-y-3 text-xs text-slate-600 dark:text-slate-300">
       <% if @recent_dividends.empty? %>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Nenhum provento registrado ainda.</p>
+        <%= render "shared/empty_alert",
+              title: "Sem proventos recentes",
+              message: "Quando houver recebimentos, eles aparecerão neste card.",
+              tone: :info,
+              compact: true %>
       <% else %>
         <% dividend_kind_labels = { "Dividend" => "Dividendo", "Interest" => "Juros", "Coupon" => "Cupom" } %>
         <% @recent_dividends.each do |dividend| %>

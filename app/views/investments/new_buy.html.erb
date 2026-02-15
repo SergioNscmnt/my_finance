@@ -43,6 +43,8 @@
         Catálogo vazio. Use "Atualizar catálogo" para importar ações, fundos e criptos da Massive.
       </div>
     <% elsif @selected_instrument && @snapshot.present? %>
+      <% snapshot_values = Array(@snapshot[:chart_values]) %>
+      <% snapshot_has_data = snapshot_values.size > 1 && snapshot_values.any?(&:positive?) %>
       <div class="mb-4 grid gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700 md:grid-cols-3">
         <div>
           <p class="text-xs text-slate-500 dark:text-slate-400">Ativo</p>
@@ -61,12 +63,22 @@
       </div>
 
       <div class="mb-4 h-60 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="line"
-          data-chart-labels-value="<%= @snapshot[:chart_labels].to_json %>"
-          data-chart-datasets-value='<%= [{ label: "Preço (2 anos)", data: @snapshot[:chart_values], borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.12)", tension: 0.2, fill: true }].to_json %>'>
-        </canvas>
+        <% if snapshot_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="line"
+            data-chart-labels-value="<%= @snapshot[:chart_labels].to_json %>"
+            data-chart-datasets-value='<%= [{ label: "Preço (2 anos)", data: @snapshot[:chart_values], borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.12)", tension: 0.2, fill: true }].to_json %>'>
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Histórico indisponível",
+                  message: "Não há pontos suficientes para montar o gráfico deste ativo agora.",
+                  tone: :warning,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
 
       <%= form_with url: investments_buy_path, method: :post, data: { turbo_frame: "_top" }, class: "grid gap-4 md:grid-cols-2", scope: :buy_order do |f| %>
@@ -88,7 +100,7 @@
 
         <div class="space-y-1">
           <%= f.label :occurred_on, "Data da compra", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
-          <%= f.date_field :occurred_on, required: true, value: Date.current, class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" %>
+          <%= f.text_field :occurred_on, required: true, value: Date.current.to_s, id: "flatpickr-date-buy", autocomplete: "off", placeholder: "DD-MM-YYYY", class: "input w-full rounded-lg border border-slate-300 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" %>
         </div>
 
         <div class="md:col-span-2 flex flex-col gap-2 sm:flex-row">
@@ -97,8 +109,11 @@
         </div>
       <% end %>
     <% else %>
-      <div class="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-        Selecione um ativo para carregar histórico de 2 anos e registrar a compra.
+      <div>
+        <%= render "shared/empty_alert",
+              title: "Nenhum ativo selecionado",
+              message: "Escolha um ativo no campo de busca para visualizar o histórico e concluir a compra.",
+              tone: :info %>
       </div>
     <% end %>
   </section>

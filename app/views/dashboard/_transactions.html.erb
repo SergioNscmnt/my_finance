@@ -9,8 +9,11 @@
   <% scroll_class = total_items > 10 ? "max-h-[520px] overflow-y-auto" : "" %>
   <div id="dashboard_transactions_list" class="<%= [scroll_class, "divide-y divide-slate-100 dark:divide-slate-800"].reject(&:blank?).join(" ") %>">
     <% if transactions_grouped.blank? %>
-      <div class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
-        Nenhuma transação encontrada no período.
+      <div class="px-4 py-6">
+        <%= render "shared/empty_alert",
+              title: "Sem transações no período",
+              message: "Este card será preenchido conforme você registrar receitas e despesas.",
+              tone: :info %>
       </div>
     <% else %>
       <% transactions_grouped.each do |(month, items)| %>

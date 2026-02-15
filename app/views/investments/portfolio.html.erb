@@ -64,8 +64,12 @@
     </div>
     <div class="mt-4 space-y-3 md:hidden">
       <% if @enriched_positions.empty? %>
-        <div class="rounded-xl border border-slate-200 px-4 py-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          Nenhuma posição cadastrada ainda.
+        <%= render "shared/empty_alert",
+              title: "Sem posições na carteira",
+              message: "Use o botão \"Comprar\" para registrar o primeiro ativo.",
+              tone: :info %>
+        <div class="mt-3 rounded-xl border border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          Dica: após a compra, este card mostrará posição, preço atual, P/L e histórico.
         </div>
       <% else %>
         <% @enriched_positions.each do |entry| %>
@@ -145,8 +149,16 @@
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
           <% if @enriched_positions.empty? %>
             <tr>
-              <td colspan="9" class="py-4 text-sm text-slate-500 dark:text-slate-400">
-                Nenhuma posição cadastrada ainda.
+              <td colspan="9" class="py-4">
+                <%= render "shared/empty_alert",
+                      title: "Sem posições na carteira",
+                      message: "Use o botão \"Comprar\" para registrar o primeiro ativo.",
+                      tone: :info %>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="9" class="pb-4 text-xs text-slate-500 dark:text-slate-400">
+                Dica: após a compra, esta tabela exibirá preços, resultado e histórico dos ativos.
               </td>
             </tr>
           <% else %>

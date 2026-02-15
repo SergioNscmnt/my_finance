@@ -43,7 +43,8 @@
       <%= form.select :payment_method,
                       Transaction.payment_methods.keys.map { |k| [payment_labels[k] || k.humanize, k] },
                       {},
-                      class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+                      class: "tom-select w-full",
+                      data: { controller: "tom-select", placeholder: "Selecione a forma de pagamento" } %>
       <% if form.object.errors[:payment_method].any? %>
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:payment_method).first %></p>
       <% end %>
@@ -63,10 +64,12 @@
 
     <div class="space-y-1">
       <%= form.label :occurred_on, "Data", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
-      <%= form.date_field :occurred_on,
+      <%= form.text_field :occurred_on,
             required: true,
-            class: "w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
-            data: { controller: "datepicker", "datepicker-alt-format-value": "d/m/Y", "datepicker-date-format-value": "Y-m-d" } %>
+            id: "flatpickr-date",
+            autocomplete: "off",
+            placeholder: "DD-MM-YYYY",
+            class: "input w-full rounded-lg border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
       <% if form.object.errors[:occurred_on].any? %>
         <p class="text-xs text-red-600"><%= form.object.errors.full_messages_for(:occurred_on).first %></p>
       <% end %>

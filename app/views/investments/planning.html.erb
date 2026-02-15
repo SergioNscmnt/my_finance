@@ -9,6 +9,12 @@
 
   <% goal_type_labels = { "Retirement" => "Aposentadoria", "Reserve" => "Reserva", "Freedom" => "Independência", "Custom" => "Personalizado" } %>
   <% asset_class_labels = { "Stock" => "Ações", "Fii" => "FIIs", "Fixed income" => "Renda fixa", "Crypto" => "Criptoativos", "Fund" => "Fundos" } %>
+  <% target_labels = @targets.map { |t| asset_class_labels.fetch(t.asset_class.to_s.humanize, t.asset_class.to_s.humanize) } %>
+  <% target_values = @targets.map(&:target_percentage) %>
+  <% allocation_labels = @allocation.keys.map { |kind| asset_class_labels.fetch(kind.to_s.humanize, kind.to_s.humanize) } %>
+  <% allocation_values = @allocation.values.map { |v| (v * 100).round(2) } %>
+  <% target_has_data = target_values.any?(&:positive?) %>
+  <% allocation_has_data = allocation_values.any?(&:positive?) %>
   <div class="grid gap-4 lg:grid-cols-3">
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Meta principal</p>
@@ -22,14 +28,24 @@
           Aporte mensal planejado: <%= number_to_currency(main_goal.monthly_contribution) %>
         </p>
       <% else %>
-        <p class="mt-2 text-sm text-slate-700 dark:text-slate-200">Cadastre suas metas para visualizar o progresso.</p>
+        <div class="mt-2">
+          <%= render "shared/empty_alert",
+                title: "Meta principal não definida",
+                message: "Cadastre metas para acompanhar progresso, prazo e aporte mensal.",
+                tone: :warning,
+                compact: true %>
+        </div>
       <% end %>
     </div>
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Metas ativas</p>
       <div class="mt-3 space-y-3 text-xs text-slate-600 dark:text-slate-300">
         <% if @goals.empty? %>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Nenhuma meta definida.</p>
+          <%= render "shared/empty_alert",
+                title: "Sem metas ativas",
+                message: "Crie metas para este card exibir objetivos e prazos.",
+                tone: :warning,
+                compact: true %>
         <% else %>
           <% @goals.each do |goal| %>
             <div class="rounded-xl border border-slate-100 px-4 py-3 dark:border-slate-800">
@@ -49,7 +65,11 @@
       <p class="text-xs text-slate-500 dark:text-slate-400">Rebalanceamento</p>
       <div class="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
         <% if @rebalance_alerts.empty? %>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Carteira dentro dos alvos definidos.</p>
+          <%= render "shared/empty_alert",
+                title: "Sem alertas de rebalanceamento",
+                message: "No momento, a carteira está alinhada com os alvos definidos.",
+                tone: :success,
+                compact: true %>
         <% else %>
           <% @rebalance_alerts.each do |alert| %>
             <div class="flex items-center justify-between rounded-xl border border-slate-100 px-4 py-3 dark:border-slate-800">
@@ -73,30 +93,50 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Alocação alvo</p>
       <div class="mt-4 h-64">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="doughnut"
-          data-chart-labels-value="<%= @targets.map { |t| asset_class_labels.fetch(t.asset_class.to_s.humanize, t.asset_class.to_s.humanize) }.to_json %>"
-          data-chart-datasets-value='<%= [
-            { label: "Alocação alvo", data: @targets.map(&:target_percentage), backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
-          ].to_json %>'
-          data-privacy-target="value">
-        </canvas>
+        <% if target_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="doughnut"
+            data-chart-labels-value="<%= target_labels.to_json %>"
+            data-chart-datasets-value='<%= [
+              { label: "Alocação alvo", data: target_values, backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
+            ].to_json %>'
+            data-privacy-target="value">
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Alocação alvo sem dados",
+                  message: "Defina metas de alocação para visualizar a distribuição ideal.",
+                  tone: :warning,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
       <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Distribuição ideal definida nas metas de alocação.</p>
     </div>
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Alocação atual</p>
       <div class="mt-4 h-64">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="doughnut"
-          data-chart-labels-value="<%= @allocation.keys.map { |kind| asset_class_labels.fetch(kind.to_s.humanize, kind.to_s.humanize) }.to_json %>"
-          data-chart-datasets-value='<%= [
-            { label: "Alocação atual", data: @allocation.values.map { |v| (v * 100).round(2) }, backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
-          ].to_json %>'
-          data-privacy-target="value">
-        </canvas>
+        <% if allocation_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="doughnut"
+            data-chart-labels-value="<%= allocation_labels.to_json %>"
+            data-chart-datasets-value='<%= [
+              { label: "Alocação atual", data: allocation_values, backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
+            ].to_json %>'
+            data-privacy-target="value">
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Alocação atual sem dados",
+                  message: "Sem posições no momento para calcular a distribuição atual.",
+                  tone: :info,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
       <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Distribuição atual com base no valor investido.</p>
     </div>

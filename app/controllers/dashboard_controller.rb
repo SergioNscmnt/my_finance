@@ -22,19 +22,15 @@ class DashboardController < ApplicationController
     @category_filter  = params[:category].presence
     @category_options = current_user.categories.expense.order(:name).pluck(:name)
 
-    @list_from, @list_to = list_range
-    @list_label = list_label(@list_from, @list_to)
-
-    list_scope = current_user.transactions.includes(:category)
-    list_scope = list_scope.where(occurred_on: @list_from..) if @list_from
-    list_scope = list_scope.where(occurred_on: ..@list_to) if @list_to
-    if params[:type].present? && Transaction.kinds.key?(params[:type])
-      list_scope = list_scope.where(kind: params[:type])
-    end
-    @transactions = list_scope.order(occurred_on: :desc, created_at: :desc).to_a
+    @list_label = "Últimas 5 transações"
+    @transactions = current_user.transactions
+                                .includes(:category)
+                                .order(occurred_on: :desc, created_at: :desc)
+                                .limit(5)
+                                .to_a
     @transactions_grouped = group_by_month(@transactions)
 
-    load_budget_planner_data
+    load_budget_planner_data(transactions)
     build_chart_data(transactions)
   end
 
@@ -44,42 +40,6 @@ class DashboardController < ApplicationController
   def scoped_transactions
     scope = current_user.transactions
     scope
-  end
-
-  # Converte string para Date; retorna nil se inválida.
-  def safe_date(raw)
-    return nil if raw.blank?
-    Date.parse(raw)
-  rescue ArgumentError
-    nil
-  end
-
-  def list_range
-    from_date = safe_date(params[:from])
-    to_date = safe_date(params[:to])
-
-    if from_date.nil? && to_date.nil?
-      to_date = Date.current
-      from_date = to_date - 1.month
-    end
-
-    if from_date && to_date && from_date > to_date
-      from_date, to_date = to_date, from_date
-    end
-
-    [from_date, to_date]
-  end
-
-  def list_label(from_date, to_date)
-    if params[:from].blank? && params[:to].blank?
-      "Últimos 30 dias"
-    elsif from_date && to_date
-      "Período: #{from_date.strftime('%d/%m/%Y')} — #{to_date.strftime('%d/%m/%Y')}"
-    elsif from_date
-      "A partir de #{from_date.strftime('%d/%m/%Y')}"
-    else
-      "Até #{to_date.strftime('%d/%m/%Y')}"
-    end
   end
 
   def group_by_month(transactions)
@@ -166,10 +126,31 @@ class DashboardController < ApplicationController
     end
   end
 
-  def load_budget_planner_data
+  def load_budget_planner_data(transactions)
     @category_budget = current_user.category_budgets.new
     @budget_categories = current_user.categories.expense.order(:name)
     @category_budgets = current_user.category_budgets.includes(:category).joins(:category).order("categories.name ASC")
+    budget_category_ids = @category_budgets.map(&:category_id)
+
+    @budget_spent_by_category_id = Hash.new(0.0)
+    transactions.each do |transaction|
+      next unless transaction.expense?
+      next unless budget_category_ids.include?(transaction.category_id)
+
+      @budget_spent_by_category_id[transaction.category_id] += transaction.monthly_amount_for(Date.current)
+    end
+
+    @budget_remaining_by_category_id = {}
+    @budget_progress_by_category_id = {}
+    @category_budgets.each do |budget|
+      planned_amount = budget.amount.to_f
+      spent_amount = @budget_spent_by_category_id[budget.category_id].to_f
+      remaining_amount = planned_amount - spent_amount
+      progress = planned_amount.positive? ? ((spent_amount / planned_amount) * 100).round(1) : 0.0
+
+      @budget_remaining_by_category_id[budget.category_id] = remaining_amount
+      @budget_progress_by_category_id[budget.category_id] = progress
+    end
 
     @planned_budget_total = @category_budgets.sum(:amount)
     @available_after_budget = @balance - @planned_budget_total

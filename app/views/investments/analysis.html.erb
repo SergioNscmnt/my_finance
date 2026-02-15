@@ -7,50 +7,87 @@
 
   <%= render "subnav" %>
 
+  <% invested_series = Array(@analysis_data[:invested]) %>
+  <% allocation_series = Array(@analysis_data[:allocation_values]) %>
+  <% dividends_series = Array(@analysis_data[:dividends]) %>
+  <% invested_has_data = invested_series.any?(&:positive?) %>
+  <% allocation_has_data = allocation_series.any?(&:positive?) %>
+  <% dividends_has_data = dividends_series.any?(&:positive?) %>
+
   <div class="grid gap-4 lg:grid-cols-3">
     <% asset_class_labels = { "Stock" => "Ações", "Fii" => "FIIs", "Fixed income" => "Renda fixa", "Crypto" => "Criptoativos", "Fund" => "Fundos" } %>
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Evolução do patrimônio</p>
       <div class="mt-4 h-56">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="line"
-          data-chart-labels-value="<%= @analysis_data[:labels].to_json %>"
-          data-chart-datasets-value='<%= [
-            { label: "Investido", data: @analysis_data[:invested], borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.15)", tension: 0.35, fill: true }
-          ].to_json %>'
-          data-privacy-target="value">
-        </canvas>
+        <% if invested_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="line"
+            data-chart-labels-value="<%= @analysis_data[:labels].to_json %>"
+            data-chart-datasets-value='<%= [
+              { label: "Investido", data: @analysis_data[:invested], borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.15)", tension: 0.35, fill: true }
+            ].to_json %>'
+            data-privacy-target="value">
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Sem evolução para exibir",
+                  message: "Registre aportes para acompanhar a evolução do patrimônio.",
+                  tone: :info,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
     </div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Alocação por classe</p>
       <div class="mt-4 h-56">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="doughnut"
-          data-chart-labels-value="<%= @analysis_data[:allocation_labels].map { |label| asset_class_labels.fetch(label, label) }.to_json %>"
-          data-chart-datasets-value='<%= [
-            { label: "Alocação", data: @analysis_data[:allocation_values], backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
-          ].to_json %>'
-          data-privacy-target="value">
-        </canvas>
+        <% if allocation_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="doughnut"
+            data-chart-labels-value="<%= @analysis_data[:allocation_labels].map { |label| asset_class_labels.fetch(label, label) }.to_json %>"
+            data-chart-datasets-value='<%= [
+              { label: "Alocação", data: @analysis_data[:allocation_values], backgroundColor: ["#10b981", "#f59e0b", "#38bdf8", "#a855f7", "#f97316"] }
+            ].to_json %>'
+            data-privacy-target="value">
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Alocação indisponível",
+                  message: "Sem posições ativas para calcular a distribuição por classe.",
+                  tone: :warning,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
     </div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs text-slate-500 dark:text-slate-400">Proventos por mês</p>
       <div class="mt-4 h-56">
-        <canvas
-          data-controller="chart"
-          data-chart-type-value="bar"
-          data-chart-labels-value="<%= @analysis_data[:labels].to_json %>"
-          data-chart-datasets-value='<%= [
-            { label: "Proventos", data: @analysis_data[:dividends], backgroundColor: "#10b981" }
-          ].to_json %>'
-          data-privacy-target="value">
-        </canvas>
+        <% if dividends_has_data %>
+          <canvas
+            data-controller="chart"
+            data-chart-type-value="bar"
+            data-chart-labels-value="<%= @analysis_data[:labels].to_json %>"
+            data-chart-datasets-value='<%= [
+              { label: "Proventos", data: @analysis_data[:dividends], backgroundColor: "#10b981" }
+            ].to_json %>'
+            data-privacy-target="value">
+          </canvas>
+        <% else %>
+          <div class="flex h-full items-center">
+            <%= render "shared/empty_alert",
+                  title: "Sem proventos no período",
+                  message: "Quando houver recebimentos, este gráfico exibirá a evolução mensal.",
+                  tone: :info,
+                  compact: true %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

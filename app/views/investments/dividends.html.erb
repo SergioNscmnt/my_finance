@@ -46,8 +46,11 @@
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
           <% if @dividends.empty? %>
             <tr>
-              <td colspan="4" class="py-4 text-sm text-slate-500 dark:text-slate-400">
-                Nenhum provento registrado ainda.
+              <td colspan="4" class="py-4">
+                <%= render "shared/empty_alert",
+                      title: "Sem histórico de proventos",
+                      message: "Registre ou sincronize proventos para preencher este histórico.",
+                      tone: :info %>
               </td>
             </tr>
           <% else %>

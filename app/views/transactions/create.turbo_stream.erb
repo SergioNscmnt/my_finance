@@ -10,10 +10,6 @@
   </turbo-frame>
 <% end %>
 
-<%= turbo_stream.replace "transaction_form" do %>
-  <%= render "form", transaction: current_user.transactions.new, categories: current_user.categories.order(:name), frame_id: "transaction_form" %>
-<% end %>
-
 <%= turbo_stream.replace "dashboard-metrics" do %>
   <%= render "dashboard/metrics", data: @dashboard_data %>
 <% end %>
@@ -24,4 +20,21 @@
 
 <%= turbo_stream.replace "dashboard-header" do %>
   <%= render "dashboard/header", data: @dashboard_data %>
+<% end %>
+
+<%= turbo_stream.replace "dashboard-budget-planner" do %>
+  <div id="dashboard-budget-planner">
+    <%= render "dashboard/budget_planner",
+          category_budget: @dashboard_data[:category_budget],
+          budget_categories: @dashboard_data[:budget_categories],
+          category_budgets: @dashboard_data[:category_budgets],
+          balance: @dashboard_data[:balance],
+          planned_budget_total: @dashboard_data[:planned_budget_total],
+          available_after_budget: @dashboard_data[:available_after_budget],
+          budget_labels: @dashboard_data[:budget_labels],
+          budget_values: @dashboard_data[:budget_values],
+          budget_spent_by_category_id: @dashboard_data[:budget_spent_by_category_id],
+          budget_remaining_by_category_id: @dashboard_data[:budget_remaining_by_category_id],
+          budget_progress_by_category_id: @dashboard_data[:budget_progress_by_category_id] %>
+  </div>
 <% end %>

@@ -1,0 +1,16 @@
+<% tone = local_assigns[:tone] || :info %>
+<% title = local_assigns[:title] || "Sem dados disponíveis" %>
+<% message = local_assigns[:message] || "Ainda não há informações para exibir nesta seção." %>
+<% compact = local_assigns[:compact] || false %>
+<% tone_classes = {
+  info: "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-200",
+  warning: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-200",
+  danger: "border-red-200 bg-red-50 text-red-800 dark:border-red-900/60 dark:bg-red-900/20 dark:text-red-200",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-200"
+} %>
+<% wrapper_classes = compact ? "rounded-lg border px-3 py-2 text-xs" : "rounded-xl border px-4 py-3 text-sm" %>
+
+<div class="<%= [wrapper_classes, tone_classes.fetch(tone, tone_classes[:info])].join(' ') %>">
+  <p class="font-semibold"><%= title %></p>
+  <p class="mt-1 opacity-90"><%= message %></p>
+</div>

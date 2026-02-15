@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   resource :account, only: %i[show update]
 
   resources :categories, except: %i[show]
-  resources :category_budgets, only: %i[create update destroy]
+  resources :category_budgets, only: %i[edit create update destroy]
   resources :transactions, except: %i[show]
   get "dashboard", to: "dashboard#index"
   get "investments/portfolio", to: "investments#portfolio"

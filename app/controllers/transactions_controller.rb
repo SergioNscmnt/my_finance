@@ -8,23 +8,9 @@ class TransactionsController < ApplicationController
     @transaction = current_user.transactions.new(kind: params[:type] || params[:kind] || :income)
     @categories  = current_user.categories.order(:name)
 
-    if request.headers["Turbo-Frame"] == "modal"
-      render :new
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "transaction_form",
-            partial: "transactions/form",
-            locals: { transaction: @transaction, categories: @categories, frame_id: "transaction_form" }
-          )
-        end
-        format.html do
-          set_collections
-          render :index
-        end
-      end
-    end
+    return render :new if turbo_modal?
+
+    redirect_to transactions_path
   end
 
   def create
@@ -85,14 +71,19 @@ class TransactionsController < ApplicationController
   def filtered_transactions
     scope = current_user.transactions
 
-    from_date = safe_date(params[:from])
-    to_date   = safe_date(params[:to])
-
-    scope = scope.where(occurred_on: from_date..) if from_date
-    scope = scope.where(occurred_on: ..to_date)   if to_date
-
     if params[:type].present? && Transaction.kinds.key?(params[:type])
       scope = scope.where(kind: params[:type])
+    end
+
+    if params[:title].present?
+      scope = scope.where("title ILIKE ?", "%#{params[:title].strip}%")
+    end
+
+    on_date = safe_date(params[:on])
+    scope = scope.where(occurred_on: on_date) if on_date
+
+    if params[:category_id].present?
+      scope = scope.where(category_id: params[:category_id])
     end
 
     scope
@@ -100,8 +91,7 @@ class TransactionsController < ApplicationController
 
   def set_collections
     scope = filtered_transactions.includes(:category).order(occurred_on: :desc, created_at: :desc)
-    @pagy, @transactions = pagy(scope, items: 10)
-    @transaction  ||= current_user.transactions.new(kind: params[:type] || params[:kind] || :income)
+    @transactions = scope.to_a
     @categories   ||= current_user.categories.order(:name)
   end
 
@@ -170,6 +160,36 @@ class TransactionsController < ApplicationController
     category_labels = selected.map(&:first)
     category_values = selected.map(&:last)
 
+    category_budget = current_user.category_budgets.new
+    budget_categories = current_user.categories.expense.order(:name)
+    category_budgets = current_user.category_budgets.includes(:category).joins(:category).order("categories.name ASC")
+    budget_category_ids = category_budgets.map(&:category_id)
+
+    budget_spent_by_category_id = Hash.new(0.0)
+    transactions.each do |transaction|
+      next unless transaction.expense?
+      next unless budget_category_ids.include?(transaction.category_id)
+
+      budget_spent_by_category_id[transaction.category_id] += transaction.monthly_amount_for(Date.current)
+    end
+
+    budget_remaining_by_category_id = {}
+    budget_progress_by_category_id = {}
+    category_budgets.each do |budget|
+      planned_amount = budget.amount.to_f
+      spent_amount = budget_spent_by_category_id[budget.category_id].to_f
+      remaining_amount = planned_amount - spent_amount
+      progress = planned_amount.positive? ? ((spent_amount / planned_amount) * 100).round(1) : 0.0
+
+      budget_remaining_by_category_id[budget.category_id] = remaining_amount
+      budget_progress_by_category_id[budget.category_id] = progress
+    end
+
+    planned_budget_total = category_budgets.sum(:amount)
+    available_after_budget = balance - planned_budget_total
+    budget_labels = category_budgets.map { |budget| budget.category.name }
+    budget_values = category_budgets.map { |budget| budget.amount.to_f }
+
     {
       receita_total: receita_total,
       despesa_total: despesa_total,
@@ -185,53 +205,30 @@ class TransactionsController < ApplicationController
       category_values: category_values,
       category_filter: params[:category].presence,
       category_options: current_user.categories.expense.order(:name).pluck(:name),
-      goals_count: current_user.respond_to?(:goals) ? current_user.goals.count : 0
+      goals_count: current_user.respond_to?(:goals) ? current_user.goals.count : 0,
+      category_budget: category_budget,
+      budget_categories: budget_categories,
+      category_budgets: category_budgets,
+      planned_budget_total: planned_budget_total,
+      available_after_budget: available_after_budget,
+      budget_labels: budget_labels,
+      budget_values: budget_values,
+      budget_spent_by_category_id: budget_spent_by_category_id,
+      budget_remaining_by_category_id: budget_remaining_by_category_id,
+      budget_progress_by_category_id: budget_progress_by_category_id
     }
   end
 
   def dashboard_transactions_payload
-    from_date, to_date = list_range
-
-    scope = current_user.transactions.includes(:category)
-    scope = scope.where(occurred_on: from_date..) if from_date
-    scope = scope.where(occurred_on: ..to_date) if to_date
-    if params[:type].present? && Transaction.kinds.key?(params[:type])
-      scope = scope.where(kind: params[:type])
-    end
-
-    transactions = scope.order(occurred_on: :desc, created_at: :desc).to_a
+    transactions = current_user.transactions
+                               .includes(:category)
+                               .order(occurred_on: :desc, created_at: :desc)
+                               .limit(5)
+                               .to_a
     grouped = transactions.group_by { |t| t.occurred_on.beginning_of_month }
     grouped = grouped.sort_by { |month, _| month }.reverse
 
-    [grouped, list_label(from_date, to_date)]
-  end
-
-  def list_range
-    from_date = safe_date(params[:from])
-    to_date = safe_date(params[:to])
-
-    if from_date.nil? && to_date.nil?
-      to_date = Date.current
-      from_date = to_date - 1.month
-    end
-
-    if from_date && to_date && from_date > to_date
-      from_date, to_date = to_date, from_date
-    end
-
-    [from_date, to_date]
-  end
-
-  def list_label(from_date, to_date)
-    if params[:from].blank? && params[:to].blank?
-      "Últimos 30 dias"
-    elsif from_date && to_date
-      "Período: #{from_date.strftime('%d/%m/%Y')} — #{to_date.strftime('%d/%m/%Y')}"
-    elsif from_date
-      "A partir de #{from_date.strftime('%d/%m/%Y')}"
-    else
-      "Até #{to_date.strftime('%d/%m/%Y')}"
-    end
+    [grouped, "Últimas 5 transações"]
   end
 
   def safe_date(raw)

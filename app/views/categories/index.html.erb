@@ -19,7 +19,16 @@
         <p class="font-semibold text-slate-900 dark:text-slate-100">Lista de categorias</p>
       </header>
       <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-        <%= render partial: "category_card", collection: @categories, as: :category %>
+        <% if @categories.any? %>
+          <%= render partial: "category_card", collection: @categories, as: :category %>
+        <% else %>
+          <div class="p-4">
+            <%= render "shared/empty_alert",
+                  title: "Nenhuma categoria cadastrada",
+                  message: "Use o botão \"Nova categoria\" para organizar receitas e despesas.",
+                  tone: :warning %>
+          </div>
+        <% end %>
       </div>
       <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200">
@@ -31,7 +40,18 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
-            <%= render @categories %>
+            <% if @categories.any? %>
+              <%= render @categories %>
+            <% else %>
+              <tr>
+                <td colspan="3" class="px-4 py-4">
+                  <%= render "shared/empty_alert",
+                        title: "Nenhuma categoria cadastrada",
+                        message: "Use o botão \"Nova categoria\" para organizar receitas e despesas.",
+                        tone: :warning %>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
       </div>

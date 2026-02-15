@@ -44,17 +44,17 @@
     </style>
   </head>
 
-  <body class="bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100">
+  <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100">
     <% auth_page = controller_name == "sessions" && action_name == "new" %>
 
     <% if auth_page %>
-      <main class="min-h-screen flex items-center justify-center px-4 py-10">
-        <div class="w-full max-w-5xl">
+      <main class="flex-1 flex items-center justify-center px-4">
+        <div class="w-full max-w-5xl flex justify-center">
           <%= yield %>
         </div>
       </main>
     <% else %>
-      <div class="min-h-screen">
+      <div class="flex-1">
         <nav class="bg-white shadow-sm dark:bg-slate-900 dark:border-b dark:border-slate-800" data-controller="mobile-menu">
           <div class="max-w-5xl mx-auto px-4 py-4">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -76,23 +76,30 @@
                 </button>
               </div>
 
-              <div class="hidden w-full flex-col items-start gap-3 lg:flex lg:flex-row lg:items-center lg:gap-4 lg:w-auto"
+              <% nav_link_classes = "inline-flex h-8 w-full items-center text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 transition-colors lg:w-auto" %>
+              <% nav_danger_link_classes = "inline-flex h-8 w-full items-center text-sm text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border-b-2 border-transparent hover:border-red-500 transition-colors lg:w-auto bg-transparent p-0" %>
+              <div class="hidden w-full flex-col items-stretch gap-3 lg:flex lg:flex-row lg:items-center lg:gap-4 lg:w-auto"
                    data-mobile-menu-target="panel">
                 <% if current_user %>
-                  <span class="text-sm text-slate-600 dark:text-slate-300 border-b-2 border-transparent pb-1">Olá, <span class="font-semibold text-slate-900 dark:text-slate-100"><%= current_user.name %></span></span>
-                  <%= link_to "Dashboard", dashboard_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Investimentos", investments_portfolio_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Transações", transactions_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Categorias", categories_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Minha conta", account_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <span class="inline-flex h-8 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    <%= l(Date.current, format: :long) %>
+                  </span>
+                  <%= link_to "Dashboard", dashboard_path, class: nav_link_classes %>
+                  <%= link_to "Investimentos", investments_portfolio_path, class: nav_link_classes %>
+                  <%= link_to "Transações", transactions_path, class: nav_link_classes %>
+                  <%= link_to "Categorias", categories_path, class: nav_link_classes %>
+                  <%= link_to "Minha conta", account_path, class: nav_link_classes %>
                   <%= button_to "Sair",
                                 session_path,
                                 method: :delete,
-                                form: { class: "w-full lg:w-auto" },
-                                class: "text-sm text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border-b-2 border-transparent hover:border-red-500 pb-1 transition-colors w-full lg:w-auto bg-transparent p-0" %>
+                                form: { class: "w-full lg:w-auto lg:flex lg:items-center" },
+                                class: nav_danger_link_classes %>
                 <% else %>
-                  <%= link_to "Entrar", new_session_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
-                  <%= link_to "Criar conta", new_user_path, class: "text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 pb-1 transition-colors w-full lg:w-auto" %>
+                  <span class="inline-flex h-8 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    <%= l(Date.current, format: :long) %>
+                  </span>
+                  <%= link_to "Entrar", new_session_path, class: nav_link_classes %>
+                  <%= link_to "Criar conta", new_user_path, class: nav_link_classes %>
                 <% end %>
                 <button type="button"
                         class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
@@ -121,6 +128,12 @@
         </main>
       </div>
     <% end %>
+
+    <footer class="border-t border-slate-200 bg-white px-4 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+      <div class="mx-auto flex max-w-5xl flex-col items-center gap-1">
+        <p>Developed by: Sérgio Nascimento © Todos os direitos reservados.</p>
+      </div>
+    </footer>
 
     <!-- Modal global controlado por Stimulus + Turbo Frame -->
     <div data-controller="modal" data-modal-open-class="is-open">

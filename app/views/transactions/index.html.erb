@@ -17,20 +17,84 @@
     </div>
   </div>
 
-  <%= turbo_frame_tag "transaction_form" do %>
-    <%= render "form", transaction: @transaction, categories: @categories, frame_id: "transaction_form" %>
-  <% end %>
+  <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <%= form_with url: transactions_path, method: :get, local: true, class: "grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end" do |f| %>
+      <div class="space-y-1 md:col-span-3">
+        <label class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Tipo</label>
+        <%= f.select :type,
+              options_for_select([["Todos", ""], ["Receita", "income"], ["Despesa", "expense"]], params[:type]),
+              {},
+              class: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
+              data: { no_tom_select: true } %>
+      </div>
+
+      <div class="space-y-1 md:col-span-3">
+        <label class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Título</label>
+        <%= f.text_field :title,
+              value: params[:title],
+              placeholder: "Buscar por título",
+              class: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+      </div>
+
+      <div class="space-y-1 md:col-span-3">
+        <label class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Data</label>
+        <%= f.text_field :on,
+              value: params[:on],
+              id: "flatpickr-date-filter",
+              autocomplete: "off",
+              placeholder: "DD-MM-YYYY",
+              class: "input w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+      </div>
+
+      <div class="space-y-1 md:col-span-3">
+        <label class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria</label>
+        <%= f.select :category_id,
+              options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
+              { include_blank: "Todas" },
+              class: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
+              data: { no_tom_select: true } %>
+      </div>
+
+      <div class="flex items-end justify-end gap-2 md:col-span-12">
+        <%= f.button type: :submit, aria: { label: "Filtrar" }, class: "inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400 md:w-auto md:px-4" do %>
+          <svg class="h-5 w-5 md:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <span class="hidden md:inline">Filtrar</span>
+        <% end %>
+
+        <%= link_to transactions_path, aria: { label: "Limpar filtros" }, class: "inline-flex h-10 w-10 items-center justify-center rounded-md bg-slate-100 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 md:w-auto md:px-4" do %>
+          <svg class="h-5 w-5 md:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="m3 16 8.5-8.5a2 2 0 0 1 2.8 0L21 14.2a2 2 0 0 1 0 2.8L17 21H8.8a2 2 0 0 1-1.4-.6L3 16Z"></path>
+            <path d="M14.5 10.5 8 17"></path>
+          </svg>
+          <span class="hidden md:inline">Limpar</span>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
 
   <%= turbo_frame_tag "transactions" do %>
     <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
         <p class="font-semibold text-slate-900 dark:text-slate-100">Lista de transações</p>
-        <span class="text-sm text-slate-500 dark:text-slate-400"><%= @pagy&.count || @transactions.size %> itens</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400"><%= @transactions.size %> itens</span>
       </header>
-      <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-        <%= render partial: "transactions/dashboard_transaction", collection: @transactions, as: :t %>
+      <% list_scroll_class = @transactions.size > 10 ? "max-h-[560px] overflow-y-auto" : "" %>
+      <div class="<%= [list_scroll_class, 'md:hidden divide-y divide-slate-100 dark:divide-slate-800'].join(' ') %>">
+        <% if @transactions.any? %>
+          <%= render partial: "transactions/dashboard_transaction", collection: @transactions, as: :t %>
+        <% else %>
+          <div class="p-4">
+            <%= render "shared/empty_alert",
+                  title: "Nenhuma transação encontrada",
+                  message: "Ajuste os filtros ou cadastre uma nova transação pelo menu \"Nova +\".",
+                  tone: :info %>
+          </div>
+        <% end %>
       </div>
-      <div class="hidden md:block overflow-x-auto">
+      <div class="<%= [list_scroll_class, 'hidden overflow-x-auto md:block'].join(' ') %>">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
           <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-300">
             <tr>
@@ -43,15 +107,21 @@
             </tr>
           </thead>
           <tbody id="transactions_list" class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
-            <%= render @transactions %>
+            <% if @transactions.any? %>
+              <%= render @transactions %>
+            <% else %>
+              <tr>
+                <td colspan="6" class="px-4 py-4">
+                  <%= render "shared/empty_alert",
+                        title: "Nenhuma transação encontrada",
+                        message: "Ajuste os filtros ou cadastre uma nova transação pelo menu \"Nova +\".",
+                        tone: :info %>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
       </div>
-      <% if @pagy&.pages.to_i > 1 %>
-        <div class="border-t border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
-          <%= pagy_nav(@pagy, link_extra: 'data-turbo-frame="transactions"').html_safe %>
-        </div>
-      <% end %>
     </section>
   <% end %>
 </div>

@@ -1,54 +1,124 @@
-<section class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-  <article class="min-h-[18rem] rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+<section class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+  <% spent_by_category_id = local_assigns[:budget_spent_by_category_id] || {} %>
+  <% remaining_by_category_id = local_assigns[:budget_remaining_by_category_id] || {} %>
+  <% progress_by_category_id = local_assigns[:budget_progress_by_category_id] || {} %>
+  <article class="min-h-[22rem] rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:col-span-6">
+    <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
       <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Planejamento de Orçamento por Categoria</h3>
       <span class="text-xs text-slate-500 dark:text-slate-400">Defina limites de gasto por categoria</span>
     </div>
 
-    <%= form_with model: category_budget, url: category_budgets_path, method: :post, class: "grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-end" do |f| %>
-      <div>
+    <%= form_with model: category_budget, url: category_budgets_path, method: :post, class: "grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end" do |f| %>
+      <div class="md:col-span-6">
+        <%= f.label :category_id, "Categoria", class: "mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300" %>
         <%= f.select :category_id,
               options_from_collection_for_select(budget_categories, :id, :name),
-              { prompt: "Selecione uma categoria" },
-              class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 bg-white focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+              include_blank: "Selecione uma categoria",
+              class: "tom-select w-full",
+              data: { controller: "tom-select", placeholder: "Selecione uma categoria" } %>
       </div>
-      <div>
+      <div class="md:col-span-6">
+        <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Valor planejado</label>
         <div data-controller="currency">
           <%= f.hidden_field :amount, data: { currency_target: "hidden" } %>
           <%= text_field_tag :category_budget_amount_display,
                 "",
                 name: nil,
-                placeholder: "Valor (R$)",
+                placeholder: "R$ 0,00",
                 inputmode: "numeric",
                 autocomplete: "off",
                 class: "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 bg-white focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
                 data: { currency_target: "display", action: "input->currency#format blur->currency#format" } %>
         </div>
       </div>
-      <div>
-        <%= f.submit "Adicionar", class: "w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+      <div class="md:col-span-12">
+        <%= f.button type: :submit,
+                     class: "inline-flex h-12 w-full items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700",
+                     aria: { label: "Adicionar orçamento" },
+                     title: "Adicionar orçamento" do %>
+          Adicionar +
+        <% end %>
       </div>
     <% end %>
+
+    <div class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+      <div class="mb-2 flex items-center justify-between">
+        <h4 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categorias planejadas</h4>
+        <span class="text-xs text-slate-500 dark:text-slate-400"><%= category_budgets.size %> categoria(s)</span>
+      </div>
+      <% if category_budgets.any? %>
+        <div class="<%= category_budgets.size > 3 ? 'max-h-56 overflow-y-auto pr-1' : '' %> space-y-2">
+          <% category_budgets.each do |budget| %>
+            <% share = planned_budget_total.positive? ? ((budget.amount.to_f / planned_budget_total.to_f) * 100).round(1) : 0 %>
+            <% spent_amount = spent_by_category_id[budget.category_id].to_f %>
+            <% remaining_amount = remaining_by_category_id.fetch(budget.category_id, budget.amount.to_f - spent_amount).to_f %>
+            <% progress = progress_by_category_id.fetch(budget.category_id, 0).to_f %>
+            <% over_budget = remaining_amount.negative? %>
+            <% progress_width = [[progress, 0].max, 100].min %>
+            <div class="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700">
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate text-sm font-medium text-slate-700 dark:text-slate-200"><%= budget.category.name %></span>
+                <span class="text-sm font-semibold <%= over_budget ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>" data-privacy-target="value">
+                  <%= over_budget ? "-#{number_to_currency(remaining_amount.abs)}" : number_to_currency(remaining_amount) %>
+                </span>
+              </div>
+              <div class="mt-1 grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Planejado: <strong data-privacy-target="value"><%= number_to_currency(budget.amount) %></strong></span>
+                <span>Gasto no mês: <strong data-privacy-target="value"><%= number_to_currency(spent_amount) %></strong></span>
+              </div>
+              <div class="mt-2">
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div class="h-full rounded-full <%= over_budget ? 'bg-red-500' : 'bg-emerald-500' %>" style="width: <%= progress_width %>%"></div>
+                </div>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                <span>
+                  <%= over_budget ? "Excedido em #{number_to_currency(remaining_amount.abs)}" : "Restante #{number_to_currency(remaining_amount)}" %>
+                </span>
+                <span><%= progress.round(1) %>% do limite usado</span>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                <span><%= share %>% do total planejado</span>
+                <div class="flex items-center gap-2">
+                  <%= link_to "Editar", edit_category_budget_path(budget), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
+                  <%= link_to "Remover", category_budget_path(budget), data: { turbo_method: :delete, turbo_confirm: "Remover orçamento planejado desta categoria?" }, class: "rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 dark:border-red-900/70 dark:text-red-300 dark:hover:bg-red-900/20" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="py-2">
+          <%= render "shared/empty_alert",
+                title: "Sem categorias planejadas",
+                message: "Adicione um orçamento por categoria para acompanhar limite, gasto e saldo restante.",
+                tone: :warning,
+                compact: true %>
+        </div>
+      <% end %>
+    </div>
   </article>
 
-  <article class="min-h-[18rem] rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <h3 class="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Mapa de Orçamento</h3>
-    <p class="text-xs text-slate-500 dark:text-slate-400">Distribuição do orçamento planejado por categoria.</p>
-    <div class="mt-3 space-y-1 text-xs text-slate-600 dark:text-slate-300">
-      <div class="flex items-center justify-between">
-        <span>Saldo atual</span>
-        <span data-privacy-target="value"><%= number_to_currency(balance) %></span>
+  <article class="min-h-[22rem] rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:col-span-6">
+    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Mapa de Orçamento</h3>
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Distribuição do orçamento planejado por categoria.</p>
+
+    <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/50">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Saldo atual</p>
+        <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100" data-privacy-target="value"><%= number_to_currency(balance) %></p>
       </div>
-      <div class="flex items-center justify-between">
-        <span>Total planejado</span>
-        <span data-privacy-target="value"><%= number_to_currency(planned_budget_total) %></span>
+      <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/50">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Total planejado</p>
+        <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100" data-privacy-target="value"><%= number_to_currency(planned_budget_total) %></p>
       </div>
-      <div class="flex items-center justify-between">
-        <span>Disponível após orçamento</span>
-        <span class="<%= available_after_budget.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>" data-privacy-target="value"><%= number_to_currency(available_after_budget) %></span>
+      <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/50">
+        <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Disponível</p>
+        <p class="mt-1 text-sm font-semibold <%= available_after_budget.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>" data-privacy-target="value"><%= number_to_currency(available_after_budget) %></p>
       </div>
     </div>
-    <div class="mt-4 <%= budget_values.any? ? 'h-60' : 'h-24' %>">
+
+    <div class="mt-4 <%= budget_values.any? ? 'h-72' : 'h-24' %>">
       <% if budget_values.any? %>
         <canvas
           data-controller="chart"
@@ -60,8 +130,14 @@
           data-privacy-target="value">
         </canvas>
       <% else %>
-        <div class="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-300 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          Adicione categorias para gerar o gráfico.
+        <div class="flex h-full items-center justify-center">
+          <div class="w-full">
+            <%= render "shared/empty_alert",
+                  title: "Mapa sem dados",
+                  message: "Defina categorias planejadas para visualizar a distribuição do orçamento.",
+                  tone: :info,
+                  compact: true %>
+          </div>
         </div>
       <% end %>
     </div>
