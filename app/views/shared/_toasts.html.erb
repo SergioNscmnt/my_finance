@@ -1,0 +1,42 @@
+<% if flash.any? %>
+  <div class="pointer-events-none fixed right-4 top-4 z-[70] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3">
+    <% flash.each do |type, message| %>
+      <% tone_classes = case type.to_s
+                      when "notice"
+                        "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-900/50 dark:text-emerald-100"
+                      when "alert"
+                        "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900/60 dark:bg-rose-900/50 dark:text-rose-100"
+                      else
+                        "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/60 dark:bg-blue-900/40 dark:text-blue-100"
+                      end %>
+      <% track_classes = type.to_s == "alert" ? "bg-rose-200/70 dark:bg-rose-800/60" : "bg-emerald-200/70 dark:bg-emerald-800/60" %>
+      <% progress_classes = type.to_s == "alert" ? "bg-rose-500 dark:bg-rose-300" : "bg-emerald-500 dark:bg-emerald-300" %>
+      <div data-controller="toast" data-toast-delay-value="3500">
+        <div class="pointer-events-auto rounded-xl border px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 <%= tone_classes %>"
+             data-toast-target="content">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <% if type.to_s == "notice" %>
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white motion-safe:animate-pulse dark:bg-emerald-400 dark:text-emerald-950">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5">
+                    <path fill-rule="evenodd" d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.312a1 1 0 0 1-1.42.002L3.29 9.29a1 1 0 1 1 1.42-1.408l4.04 4.078 6.542-6.598a1 1 0 0 1 1.412-.072Z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              <% end %>
+              <span><%= message %></span>
+            </div>
+            <button type="button"
+                    class="shrink-0 rounded-full p-1 hover:bg-black/10 dark:hover:bg-white/10"
+                    data-action="click->toast#dismiss"
+                    aria-label="Fechar aviso">
+              &times;
+            </button>
+          </div>
+          <div class="mt-2 h-1 w-full overflow-hidden rounded-full <%= track_classes %>">
+            <div class="h-full rounded-full <%= progress_classes %>" data-toast-target="progress"></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

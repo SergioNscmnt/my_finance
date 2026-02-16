@@ -1,12 +1,13 @@
-<article id="<%= dom_id(t, :dash) %>" class="flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+<% reference_month = local_assigns.fetch(:reference_month, t.occurred_on.beginning_of_month).to_date.beginning_of_month %>
+<article id="<%= "#{dom_id(t, :dash)}-#{reference_month.strftime('%Y%m')}" %>" class="flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
   <div class="flex-1 w-full">
     <p class="font-medium text-slate-900 dark:text-slate-100"><%= t.title %></p>
     <p class="text-sm text-slate-500 dark:text-slate-400">
       <%= t.category&.name || "Sem categoria" %> · <%= l(t.occurred_on) %>
     </p>
   </div>
-  <% current_amount = t.display_amount %>
-  <% installment_idx = t.installment_number_for(t.occurred_on) %>
+  <% current_amount = t.monthly_amount_for(reference_month) %>
+  <% installment_idx = t.installment_number_for(reference_month) %>
   <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
     <p class="text-sm font-semibold <%= t.income? ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' %>">
       <%= t.income? ? '+' : '-' %> <%= number_to_currency(current_amount) %>

@@ -1,3 +1,9 @@
+<%= turbo_stream.replace "flash_toasts" do %>
+  <div id="flash_toasts">
+    <%= render "shared/toasts" %>
+  </div>
+<% end %>
+
 <%= turbo_stream.remove @transaction %>
 <%= turbo_stream.replace "dashboard_transactions" do %>
   <turbo-frame id="dashboard_transactions">

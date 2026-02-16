@@ -1,3 +1,9 @@
+<%= turbo_stream.replace "flash_toasts" do %>
+  <div id="flash_toasts">
+    <%= render "shared/toasts" %>
+  </div>
+<% end %>
+
 <%= turbo_stream.prepend "transactions_list" do %>
   <%= render @transaction %>
 <% end %>

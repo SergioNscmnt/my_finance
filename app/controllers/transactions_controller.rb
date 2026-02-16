@@ -18,9 +18,13 @@ class TransactionsController < ApplicationController
     if @transaction.save
       @dashboard_data = dashboard_data
       @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
+      created_message = "#{transaction_kind_label(@transaction)} criada"
       respond_to do |format|
-        format.turbo_stream { render :create }
-        format.html { redirect_to transactions_path, notice: "Transação criada" }
+        format.turbo_stream do
+          flash.now[:notice] = created_message
+          render :create
+        end
+        format.html { redirect_to transactions_path, notice: created_message }
       end
     else
       @categories = current_user.categories.order(:name)
@@ -38,7 +42,10 @@ class TransactionsController < ApplicationController
       @dashboard_data = dashboard_data
       @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
       respond_to do |format|
-        format.turbo_stream { render :update }
+        format.turbo_stream do
+          flash.now[:notice] = "Transação atualizada"
+          render :update
+        end
         format.html { redirect_to transactions_path, notice: "Transação atualizada" }
       end
     else
@@ -53,7 +60,10 @@ class TransactionsController < ApplicationController
     @dashboard_data = dashboard_data
     @dashboard_transactions_grouped, @dashboard_transactions_label = dashboard_transactions_payload
     respond_to do |format|
-      format.turbo_stream { render :destroy }
+      format.turbo_stream do
+        flash.now[:notice] = "Transação removida"
+        render :destroy
+      end
       format.html { redirect_to transactions_path, notice: "Transação removida" }
     end
   end
@@ -66,6 +76,10 @@ class TransactionsController < ApplicationController
 
   def transaction_params
     params.require(:transaction).permit(:title, :amount, :kind, :occurred_on, :category_id, :payment_method, :installments)
+  end
+
+  def transaction_kind_label(transaction)
+    transaction.expense? ? "Despesa" : "Receita"
   end
 
   def filtered_transactions
@@ -239,12 +253,40 @@ class TransactionsController < ApplicationController
     transactions = current_user.transactions
                                .includes(:category)
                                .order(occurred_on: :desc, created_at: :desc)
-                               .limit(5)
                                .to_a
-    grouped = transactions.group_by { |t| t.occurred_on.beginning_of_month }
-    grouped = grouped.sort_by { |month, _| month }.reverse
+    entries = transactions.flat_map do |transaction|
+      monthly_reference_months_for(transaction).filter_map do |month|
+        next if transaction.monthly_amount_for(month).zero?
 
-    [grouped, "Últimas 5 transações"]
+        { transaction: transaction, month: month }
+      end
+    end
+
+    grouped = entries.group_by { |entry| entry[:month] }
+    grouped = grouped.transform_values do |month_entries|
+      month_entries.sort_by do |entry|
+        transaction = entry[:transaction]
+        [transaction.occurred_on, transaction.created_at || Time.at(0), transaction.id || 0]
+      end.reverse
+    end
+    grouped = grouped.sort_by { |month, _| month }.reverse.to_h
+
+    [grouped, "Transações por mês"]
+  end
+
+  def monthly_reference_months_for(transaction)
+    start_month = transaction.billing_start_month
+    installments = [transaction.installments.to_i, 1].max
+    end_month = start_month + (installments - 1).months
+
+    months = []
+    cursor = start_month
+    while cursor <= end_month
+      months << cursor
+      cursor = cursor.next_month
+    end
+
+    months
   end
 
   def safe_date(raw)

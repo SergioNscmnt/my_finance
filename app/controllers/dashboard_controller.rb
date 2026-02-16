@@ -22,11 +22,10 @@ class DashboardController < ApplicationController
     @category_filter  = params[:category].presence
     @category_options = current_user.categories.expense.order(:name).pluck(:name)
 
-    @list_label = "Últimas 5 transações"
+    @list_label = "Transações por mês"
     @transactions = current_user.transactions
                                 .includes(:category)
                                 .order(occurred_on: :desc, created_at: :desc)
-                                .limit(5)
                                 .to_a
     @transactions_grouped = group_by_month(@transactions)
 
@@ -44,8 +43,38 @@ class DashboardController < ApplicationController
   end
 
   def group_by_month(transactions)
-    grouped = transactions.group_by { |t| t.occurred_on.beginning_of_month }
-    grouped.sort_by { |month, _| month }.reverse
+    entries = transactions.flat_map do |transaction|
+      monthly_reference_months_for(transaction).filter_map do |month|
+        next if transaction.monthly_amount_for(month).zero?
+
+        { transaction: transaction, month: month }
+      end
+    end
+
+    grouped = entries.group_by { |entry| entry[:month] }
+    grouped = grouped.transform_values do |month_entries|
+      month_entries.sort_by do |entry|
+        transaction = entry[:transaction]
+        [transaction.occurred_on, transaction.created_at || Time.at(0), transaction.id || 0]
+      end.reverse
+    end
+
+    grouped.sort_by { |month, _| month }.reverse.to_h
+  end
+
+  def monthly_reference_months_for(transaction)
+    start_month = transaction.billing_start_month
+    installments = [transaction.installments.to_i, 1].max
+    end_month = start_month + (installments - 1).months
+
+    months = []
+    cursor = start_month
+    while cursor <= end_month
+      months << cursor
+      cursor = cursor.next_month
+    end
+
+    months
   end
 
   def build_chart_data(transactions)
