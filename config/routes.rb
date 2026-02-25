@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   get "investments/dividends", to: "investments#dividends"
   get "investments/integrations", to: "investments#integrations"
   get "investments/live_rates", to: "investments#live_rates"
+  get "investments/quotes", to: "investments/quotes#index"
 
   resources :assets do
     collection do

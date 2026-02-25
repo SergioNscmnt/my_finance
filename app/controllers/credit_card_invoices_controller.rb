@@ -2,7 +2,7 @@ class CreditCardInvoicesController < ApplicationController
   before_action :set_invoice
 
   def pay
-    @invoice.update!(status: :paid, paid_at: Time.current)
+    CreditCardInvoicePaymentService.new(invoice: @invoice).call
     redirect_to dashboard_path, notice: "Fatura marcada como paga."
   end
 

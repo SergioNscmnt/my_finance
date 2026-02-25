@@ -13,6 +13,7 @@ import ToastController from "./controllers/toast_controller"
 import LiveFxController from "./controllers/live_fx_controller"
 import AssetFormController from "./controllers/asset_form_controller"
 import LiveAssetQuoteController from "./controllers/live_asset_quote_controller"
+import QuotesController from "./controllers/quotes_controller"
 import FlatpickrDatepicker from "./flatpickr_datepicker"
 
 const application = Application.start()
@@ -33,6 +34,7 @@ application.register("toast", ToastController)
 application.register("live-fx", LiveFxController)
 application.register("asset-form", AssetFormController)
 application.register("live-asset-quote", LiveAssetQuoteController)
+application.register("quotes", QuotesController)
 
 const withController = (element, controllerName) => {
   const current = (element.getAttribute("data-controller") || "").trim()

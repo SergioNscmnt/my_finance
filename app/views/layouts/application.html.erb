@@ -48,15 +48,15 @@
     <% auth_page = controller_name == "sessions" && action_name == "new" %>
 
     <% if auth_page %>
-      <main class="flex-1 flex items-center justify-center px-4">
-        <div class="w-full max-w-5xl flex justify-center">
+      <main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div class="w-full flex justify-center">
           <%= yield %>
         </div>
       </main>
     <% else %>
       <div class="flex-1">
         <nav class="bg-white shadow-sm dark:bg-slate-900 dark:border-b dark:border-slate-800" data-controller="mobile-menu">
-          <div class="max-w-5xl mx-auto px-4 py-4">
+          <div class="w-full px-4 py-4 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div class="flex items-center justify-between">
                 <%= link_to root_path, class: "flex items-center gap-1.5 font-semibold text-lg leading-none text-gray-900 dark:text-slate-100" do %>
@@ -77,7 +77,7 @@
               </div>
 
               <% nav_link_classes = "inline-flex h-8 w-full items-center text-sm text-gray-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-500 transition-colors lg:w-auto" %>
-              <% nav_danger_link_classes = "inline-flex h-8 w-full items-center text-sm text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border-b-2 border-transparent hover:border-red-500 transition-colors lg:w-auto bg-transparent p-0" %>
+              <% nav_danger_link_classes = "inline-flex h-8 w-full items-center text-sm text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200 border-b-2 border-transparent hover:border-red-500 transition-colors lg:w-auto bg-transparent p-0 cursor-pointer" %>
               <div class="hidden w-full flex-col items-stretch gap-3 lg:flex lg:flex-row lg:items-center lg:gap-4 lg:w-auto"
                    data-mobile-menu-target="panel">
                 <div class="grid w-full grid-cols-2 gap-2 lg:w-auto lg:flex lg:items-center lg:gap-2">
@@ -123,14 +123,14 @@
           <%= render "shared/toasts" %>
         </div>
 
-        <main class="max-w-5xl mx-auto px-4 py-6">
+        <main class="w-full px-4 py-6 sm:px-6 lg:px-8">
           <%= yield %>
         </main>
       </div>
     <% end %>
 
     <footer class="border-t border-slate-200 bg-white px-4 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-      <div class="mx-auto flex max-w-5xl flex-col items-center gap-1">
+      <div class="w-full flex flex-col items-center gap-1">
         <p>Developed by: Sérgio Nascimento © Todos os direitos reservados.</p>
       </div>
     </footer>
