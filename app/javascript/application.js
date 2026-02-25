@@ -1,5 +1,3 @@
-//= link controllers/buy_order_controller.js
-//= link controllers/toast_controller.js
 import "@hotwired/turbo-rails"
 import { Application } from "@hotwired/stimulus"
 import TomSelectController from "./controllers/tom_select_controller"
@@ -12,6 +10,9 @@ import MobileMenuController from "./controllers/mobile_menu_controller"
 import ThemeController from "./controllers/theme_controller"
 import BuyOrderController from "./controllers/buy_order_controller"
 import ToastController from "./controllers/toast_controller"
+import LiveFxController from "./controllers/live_fx_controller"
+import AssetFormController from "./controllers/asset_form_controller"
+import LiveAssetQuoteController from "./controllers/live_asset_quote_controller"
 import FlatpickrDatepicker from "./flatpickr_datepicker"
 
 const application = Application.start()
@@ -29,6 +30,9 @@ application.register("mobile-menu", MobileMenuController)
 application.register("theme", ThemeController)
 application.register("buy-order", BuyOrderController)
 application.register("toast", ToastController)
+application.register("live-fx", LiveFxController)
+application.register("asset-form", AssetFormController)
+application.register("live-asset-quote", LiveAssetQuoteController)
 
 const withController = (element, controllerName) => {
   const current = (element.getAttribute("data-controller") || "").trim()

@@ -13,6 +13,8 @@ Rails.application.routes.draw do
     end
   end
   resources :transactions, except: %i[show]
+  get "transactions/import_statement_pdf", to: "transactions#import_statement_pdf", as: :import_statement_pdf_transactions
+  post "transactions/import_statement_pdf", to: "transactions#create_statement_import", as: :create_statement_import_transactions
   get "dashboard", to: "dashboard#index"
   get "investments/portfolio", to: "investments#portfolio"
   get "investments/analysis", to: "investments#analysis"
@@ -20,13 +22,15 @@ Rails.application.routes.draw do
   get "investments/income", to: "investments#income"
   get "investments/dividends", to: "investments#dividends"
   get "investments/integrations", to: "investments#integrations"
-  post "investments/integrations/sync_massive", to: "investments#sync_massive", as: :investments_sync_massive
-  post "investments/integrations/sync_instruments", to: "investments#sync_instruments", as: :investments_sync_instruments
-  get "investments/buy", to: "investments#new_buy", as: :new_investments_buy
-  post "investments/buy", to: "investments#create_buy", as: :investments_buy
-  get "investments/instruments/search", to: "investments#search_instruments", as: :investments_instruments_search
+  get "investments/live_rates", to: "investments#live_rates"
 
   resources :assets do
+    collection do
+      get "tickers/search", to: "assets#search_tickers", as: :tickers_search
+    end
+    member do
+      get :live_quote
+    end
     resources :investment_transactions, except: %i[index show]
     resources :dividends, except: %i[index show]
   end

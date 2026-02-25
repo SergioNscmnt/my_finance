@@ -52,7 +52,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl default-mysql-client libvips && \
+    apt-get install --no-install-recommends -y curl default-mysql-client libvips poppler-utils && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy tailwind binary into final image

@@ -158,64 +158,13 @@ def seed_dividend!(wallet:, asset:, kind:, amount:, paid_on:, reinvested: false)
   )
 end
 
-def seed_massive_backed_portfolio!(wallet:, seed_assets:)
-  market_data = MassiveApi::MarketDataService.new
+def seed_portfolio!(wallet:, seed_assets:)
+  fx_rate = Frankfurter::MarketDataService.new.quote_for(seed_assets.first)[:exchange_rate].to_d
+  fx_rate = BigDecimal("5.0") if fx_rate <= 0
 
-  if market_data.enabled?
-    seed_assets.each_with_index do |asset, index|
-      quote = market_data.quote_for(asset)
-      market_price = quote[:market_price].to_d
-      next if market_price <= 0
-
-      quantity = if asset.crypto?
-                   BigDecimal((0.03 + (index * 0.01)).round(4).to_s)
-                 else
-                   BigDecimal((8 + (index * 3)).to_s)
-                 end
-
-      first_buy_date = Date.current - (120 - index * 7).days
-      second_buy_date = Date.current - (45 - index * 4).days
-      buy_price_1 = (market_price * 0.92).round(6)
-      buy_price_2 = (market_price * 0.97).round(6)
-
-      seed_investment_transaction!(
-        wallet: wallet,
-        asset: asset,
-        kind: :buy,
-        quantity: quantity,
-        price: buy_price_1,
-        fees: (quantity * 0.05).round(2),
-        occurred_on: first_buy_date
-      )
-      seed_investment_transaction!(
-        wallet: wallet,
-        asset: asset,
-        kind: :buy,
-        quantity: (quantity / 2).round(6),
-        price: buy_price_2,
-        fees: (quantity * 0.04).round(2),
-        occurred_on: second_buy_date
-      )
-
-      next if asset.crypto?
-
-      seed_dividend!(
-        wallet: wallet,
-        asset: asset,
-        kind: :dividend,
-        amount: (market_price * 0.01).round(2),
-        paid_on: Date.current - (30 - index * 2).days
-      )
-    end
-
-    report = MassiveApi::DividendSyncService.new(wallet: wallet).call
-    puts "Massive seed sync de proventos: #{report[:synced]} sincronizados, #{report[:skipped]} ignorados, #{report[:errors]} erros"
-    return
-  end
-
-  # Fallback deterministic para ambiente sem chave API.
   seed_assets.each_with_index do |asset, index|
     base_price = asset.crypto? ? BigDecimal("45000") : BigDecimal((100 + (index * 40)).to_s)
+    price = (base_price * fx_rate).round(2)
     quantity = asset.crypto? ? BigDecimal("0.05") : BigDecimal((10 + index * 2).to_s)
 
     seed_investment_transaction!(
@@ -223,7 +172,7 @@ def seed_massive_backed_portfolio!(wallet:, seed_assets:)
       asset: asset,
       kind: :buy,
       quantity: quantity,
-      price: base_price,
+      price: price,
       fees: 2.5,
       occurred_on: Date.current - (100 - index * 5).days
     )
@@ -234,13 +183,13 @@ def seed_massive_backed_portfolio!(wallet:, seed_assets:)
       wallet: wallet,
       asset: asset,
       kind: :dividend,
-      amount: (base_price * 0.008).round(2),
+      amount: (price * 0.008).round(2),
       paid_on: Date.current - (20 - index).days
     )
   end
 end
 
-seed_massive_backed_portfolio!(wallet: wallet, seed_assets: seed_assets)
+seed_portfolio!(wallet: wallet, seed_assets: seed_assets)
 
 positions = Investments::PositionCalculator.new(wallet: wallet).call
 invested_total = positions.sum(&:invested_amount).to_d

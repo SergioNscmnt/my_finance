@@ -13,6 +13,35 @@ class TransactionsController < ApplicationController
     redirect_to transactions_path
   end
 
+  def import_statement_pdf
+    @statement_reference_month = Date.current.beginning_of_month
+    render :import_statement_pdf
+  end
+
+  def create_statement_import
+    file = params[:statement_pdf]
+    if file.blank?
+      @statement_reference_month = safe_month(params[:statement_reference_month]) || Date.current.beginning_of_month
+      flash.now[:alert] = "Selecione um arquivo PDF."
+      render :import_statement_pdf, status: :unprocessable_entity
+      return
+    end
+
+    statement_reference_month = safe_month(params[:statement_reference_month]) || Date.current.beginning_of_month
+    report = StatementImports::BancoDoBrasilPdfImporter.new(
+      user: current_user,
+      pdf_path: file.tempfile.path,
+      statement_reference_month: statement_reference_month,
+      delete_pdf_after_import: ActiveModel::Type::Boolean.new.cast(params[:delete_pdf_after_import])
+    ).call
+
+    redirect_to transactions_path, notice: "Importação concluída: #{report[:created]} criadas, #{report[:existing]} já existentes, #{report[:ignored]} ignoradas."
+  rescue StandardError => e
+    @statement_reference_month = statement_reference_month || Date.current.beginning_of_month
+    flash.now[:alert] = "Falha ao importar PDF: #{e.message}"
+    render :import_statement_pdf, status: :unprocessable_entity
+  end
+
   def create
     @transaction = current_user.transactions.new(transaction_params)
     if @transaction.save
@@ -292,6 +321,13 @@ class TransactionsController < ApplicationController
   def safe_date(raw)
     return nil if raw.blank?
     Date.parse(raw)
+  rescue ArgumentError
+    nil
+  end
+
+  def safe_month(raw)
+    return nil if raw.blank?
+    Date.strptime(raw, "%Y-%m").beginning_of_month
   rescue ArgumentError
     nil
   end

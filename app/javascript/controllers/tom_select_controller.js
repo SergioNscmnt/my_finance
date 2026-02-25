@@ -61,6 +61,11 @@ export default class extends Controller {
     }
 
     this.tom = new TomSelect(this.element, config)
+
+    this.tom.on("item_add", (value) => {
+      const option = this.tom.options[value]
+      this.element.dispatchEvent(new CustomEvent("tom-select:item-add", { detail: option, bubbles: true }))
+    })
   }
 
   disconnect() {

@@ -1,0 +1,61 @@
+<div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Ativos</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Gerencie os ativos usados no módulo de investimentos.</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Voltar para carteira", investments_portfolio_path, class: "inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" %>
+      <%= link_to "Cadastrar ativo", new_asset_path(return_to: assets_path), data: { turbo_frame: "modal" }, class: "inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+    </div>
+  </div>
+
+  <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <p class="font-semibold text-slate-900 dark:text-slate-100">Lista de ativos</p>
+      <span class="text-sm text-slate-500 dark:text-slate-400"><%= @assets.size %> itens</span>
+    </header>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+          <tr>
+            <th class="px-4 py-3">Nome</th>
+            <th class="px-4 py-3">Ticker</th>
+            <th class="px-4 py-3">Classe</th>
+            <th class="px-4 py-3">Moeda</th>
+            <th class="px-4 py-3 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
+          <% if @assets.any? %>
+            <% @assets.each do |asset| %>
+              <tr>
+                <td class="px-4 py-3">
+                  <%= link_to asset.name, asset_path(asset), class: "font-medium text-slate-900 hover:underline dark:text-slate-100" %>
+                </td>
+                <td class="px-4 py-3 uppercase"><%= asset.ticker %></td>
+                <td class="px-4 py-3"><%= asset.asset_type_label_pt_br %></td>
+                <td class="px-4 py-3 uppercase"><%= asset.currency %></td>
+                <td class="px-4 py-3 text-right">
+                  <div class="inline-flex items-center gap-2">
+                    <%= link_to "Editar", edit_asset_path(asset, return_to: assets_path), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
+                    <%= link_to "Excluir", asset_path(asset), data: { turbo_method: :delete, turbo_confirm: "Excluir ativo e movimentações relacionadas?" }, class: "rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/70 dark:text-red-300 dark:hover:bg-red-900/20" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="5" class="px-4 py-4">
+                <%= render "shared/empty_alert",
+                      title: "Nenhum ativo cadastrado",
+                      message: "Cadastre um ativo para começar a acompanhar sua carteira.",
+                      tone: :info %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
