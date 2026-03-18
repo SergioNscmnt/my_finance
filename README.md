@@ -59,3 +59,26 @@ Ainda não configurado (sugestão: adicionar RSpec ou Minitest + system tests).
 
 ## Suporte
 Ajuste variáveis no `docker-compose.yml` ou `.env.example`. Issues/PRs são bem-vindos.
+
+## Deploy no Render
+Este projeto pode subir no Render usando `Docker` + banco `PostgreSQL` do próprio Render (em produção o app passa a ler `DATABASE_URL`).
+
+1) Suba o código para GitHub/GitLab.
+2) No Render, crie um banco `PostgreSQL` (ex.: `my-finance-db`).
+3) Crie um `Web Service` a partir do repositório:
+   - Runtime: `Docker`
+   - Dockerfile Path: `./Dockerfile`
+   - Health Check Path: `/up`
+   - Start Command:
+     ```bash
+     ./bin/rails server -b 0.0.0.0 -p $PORT
+     ```
+4) Configure as variáveis de ambiente no Web Service:
+   - `RAILS_ENV=production`
+   - `RAILS_LOG_LEVEL=info`
+   - `SECRET_KEY_BASE` (generate no Render)
+   - `RAILS_MASTER_KEY` (valor do seu `config/master.key`)
+   - `DATABASE_URL` (use o valor de conexão do banco PostgreSQL criado no Render)
+5) Faça deploy. O `bin/docker-entrypoint` já executa `db:prepare` automaticamente na inicialização.
+
+Observação: em desenvolvimento local, o projeto continua usando MariaDB via `docker-compose`.

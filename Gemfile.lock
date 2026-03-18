@@ -137,6 +137,7 @@ GEM
     marcel (1.1.0)
     matrix (0.4.3)
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     minitest (5.26.1)
     msgpack (1.8.0)
     mutex_m (0.3.0)
@@ -152,9 +153,14 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nio4r (2.7.5)
+    nokogiri (1.17.2)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.17.2-x86_64-linux)
       racc (~> 1.4)
     pagy (6.5.0)
+    pg (1.6.3)
+    pg (1.6.3-x86_64-linux)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -236,6 +242,7 @@ GEM
       railties (>= 7.0.0)
       tailwindcss-ruby (~> 4.0)
     tailwindcss-ruby (4.1.18)
+    tailwindcss-ruby (4.1.18-x86_64-linux)
     thor (1.5.0)
     timeout (0.6.0)
     tsort (0.2.0)
@@ -270,6 +277,7 @@ DEPENDENCIES
   importmap-rails
   mysql2 (~> 0.5)
   pagy (~> 6.5)
+  pg (~> 1.5)
   puma (>= 5.0)
   rails (~> 7.1.6)
   selenium-webdriver

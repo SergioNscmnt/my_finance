@@ -25,7 +25,7 @@ FROM base as build
 
 # Install packages needed to build gems and download tailwind binary
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev git libvips pkg-config curl
+    apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev git libpq-dev libvips pkg-config curl
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -52,7 +52,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl default-mysql-client libvips poppler-utils && \
+    apt-get install --no-install-recommends -y curl default-mysql-client libpq5 libvips poppler-utils && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy tailwind binary into final image

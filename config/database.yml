@@ -50,7 +50,11 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
+  <% if ENV["DATABASE_URL"].present? %>
+  url: <%= ENV["DATABASE_URL"] %>
+  <% else %>
   <<: *default
   database: <%= ENV.fetch("DATABASE_NAME_PRODUCTION", "my_finance_production") %>
   username: <%= ENV.fetch("DATABASE_USER", "my_finance") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD") { ENV["MY_FINANCE_DATABASE_PASSWORD"] } %>
+  <% end %>
