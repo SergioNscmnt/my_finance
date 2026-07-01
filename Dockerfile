@@ -55,16 +55,18 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl default-mysql-client libpq5 libvips poppler-utils && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Create the runtime user before copying app files with ownership.
+RUN useradd rails --create-home --shell /bin/bash
+
 # Copy tailwind binary into final image
 COPY --from=build /usr/local/bin/tailwindcss /usr/local/bin/tailwindcss
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /rails /rails
+COPY --from=build --chown=rails:rails /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
-RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
+RUN mkdir -p db log storage tmp
 USER rails:rails
 
 # Entrypoint prepares the database.

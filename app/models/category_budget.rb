@@ -2,12 +2,19 @@ class CategoryBudget < ApplicationRecord
   belongs_to :user
   belongs_to :category
 
+  before_validation :normalize_budget_month
+
   validates :amount, numericality: { greater_than_or_equal_to: 0 }
-  validates :category_id, uniqueness: { scope: :user_id }
+  validates :budget_month, presence: true
+  validates :category_id, uniqueness: { scope: %i[user_id budget_month] }
   validate :category_must_belong_to_user
   validate :category_must_be_expense
 
   private
+
+  def normalize_budget_month
+    self.budget_month = (budget_month.presence || Date.current).to_date.beginning_of_month
+  end
 
   def category_must_belong_to_user
     return if category.blank? || user.blank?

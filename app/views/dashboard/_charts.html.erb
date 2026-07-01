@@ -1,14 +1,15 @@
 <% data = local_assigns[:data] || @dashboard_data %>
 <% income_series = Array(data[:chart_income]) %>
 <% expense_series = Array(data[:chart_expense]) %>
+<% balance_series = Array(data[:chart_balance]) %>
 <% pie_series = Array(data[:pie_values]) %>
 <% category_series = Array(data[:category_values]) %>
-<% flow_has_data = income_series.any?(&:positive?) || expense_series.any?(&:positive?) %>
+<% flow_has_data = income_series.any?(&:positive?) || expense_series.any?(&:positive?) || balance_series.any? { |value| value.to_f != 0 } %>
 <% pie_has_data = pie_series.any?(&:positive?) %>
 <% top_categories_has_data = category_series.any?(&:positive?) %>
 <% flow_total_income = income_series.sum.to_f %>
 <% flow_total_expense = expense_series.sum.to_f %>
-<% flow_net = flow_total_income - flow_total_expense %>
+<% flow_net = balance_series.present? ? balance_series.last.to_f : flow_total_income - flow_total_expense %>
 <section class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
   <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
     <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -44,7 +45,8 @@
           data-chart-labels-value="<%= data[:chart_labels].to_json %>"
           data-chart-datasets-value='<%= [
             { label: "Receitas", data: data[:chart_income], borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.15)", tension: 0.3, fill: true },
-            { label: "Despesas", data: data[:chart_expense], borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.15)", tension: 0.3, fill: true }
+            { label: "Despesas", data: data[:chart_expense], borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.15)", tension: 0.3, fill: true },
+            { label: "Saldo acumulado", data: data[:chart_balance], borderColor: "#2563eb", backgroundColor: "rgba(37,99,235,0.12)", tension: 0.3, fill: false }
           ].to_json %>'
           data-privacy-target="value">
         </canvas>

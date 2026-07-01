@@ -5,11 +5,6 @@ class User < ApplicationRecord
   has_many :category_budgets, dependent: :destroy
   has_many :credit_card_invoices, dependent: :destroy
   has_many :transactions, dependent: :destroy
-  has_many :wallets, dependent: :destroy
-  has_many :portfolios, dependent: :destroy
-  has_many :assets, through: :wallets
-  has_many :investment_transactions, through: :wallets
-  has_many :dividends, through: :wallets
 
   after_create :ensure_default_categories
 
@@ -20,8 +15,8 @@ class User < ApplicationRecord
 
   def ensure_default_categories
     defaults = {
-      income: ["Salário", "Bônus", "Freelance", "Reembolso", "Investimentos (receita)", "Outras receitas"],
-      expense: ["Alimentação", "Transporte", "Moradia", "Saúde", "Lazer", "Educação", "Contas e Serviços", "Compras", "Animais de Estimação", "Investimentos (despesa)", "Outras despesas"]
+      income: ["Salário", "Bônus", "Freelance", "Reembolso", "Outras receitas"],
+      expense: ["Alimentação", "Transporte", "Moradia", "Saúde", "Lazer", "Educação", "Contas e Serviços", "Compras", "Animais de Estimação", "Outras despesas"]
     }
     defaults.each do |kind, names|
       names.each do |name|

@@ -25,6 +25,8 @@ class CreditCardInvoicePaymentService
   end
 
   def reset_planned_category_limits!
-    @invoice.user.category_budgets.where(category_id: @invoice.category_id).update_all(amount: 0, updated_at: Time.current)
+    @invoice.user.category_budgets
+            .where(category_id: @invoice.category_id, budget_month: @invoice.billing_month)
+            .update_all(amount: 0, updated_at: Time.current)
   end
 end

@@ -1,4 +1,5 @@
 <section class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+  <% selected_month = (local_assigns[:selected_budget_month] || Date.current.beginning_of_month).to_date.beginning_of_month %>
   <% spent_by_category_id = local_assigns[:budget_spent_by_category_id] || {} %>
   <% remaining_by_category_id = local_assigns[:budget_remaining_by_category_id] || {} %>
   <% progress_by_category_id = local_assigns[:budget_progress_by_category_id] || {} %>
@@ -8,9 +9,25 @@
   <% total_usage = planned_total.positive? ? ((spent_total / planned_total) * 100) : 0 %>
   <% total_usage_width = [[total_usage, 0].max, 100].min %>
   <article class="min-h-[22rem] rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:col-span-6">
-    <div class="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Planejamento de Orçamento por Categoria</h3>
-      <span class="text-xs text-slate-500 dark:text-slate-400">Defina limites de gasto por categoria</span>
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Planejamento de Orçamento por Categoria</h3>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Defina limites de gasto por categoria</span>
+      </div>
+      <%= form_with url: dashboard_path,
+            method: :get,
+            data: { turbo_frame: "dashboard-budget-planner" },
+            class: "flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400" do %>
+        <%= hidden_field_tag :months, params[:months] if params[:months].present? %>
+        <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
+        <%= label_tag :budget_month, "Mês", class: "font-medium" %>
+        <%= text_field_tag :budget_month,
+              selected_month.strftime("%Y-%m-%d"),
+              id: "flatpickr-budget-month",
+              autocomplete: "off",
+              placeholder: "MM/AAAA",
+              class: "w-36 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+      <% end %>
     </div>
 
     <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -38,7 +55,12 @@
       </div>
     </div>
 
-    <%= form_with model: category_budget, url: category_budgets_path, method: :post, class: "grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50/40 p-3 md:grid-cols-12 md:items-end dark:border-slate-700 dark:bg-slate-800/20" do |f| %>
+    <%= form_with model: category_budget,
+          url: category_budgets_path,
+          method: :post,
+          data: { turbo_frame: "dashboard-budget-planner" },
+          class: "grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50/40 p-3 md:grid-cols-12 md:items-end dark:border-slate-700 dark:bg-slate-800/20" do |f| %>
+      <%= f.hidden_field :budget_month, value: selected_month.strftime("%Y-%m-%d") %>
       <div class="md:col-span-6">
         <%= f.label :category_id, "Categoria", class: "mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300" %>
         <%= f.select :category_id,
@@ -136,7 +158,7 @@
               <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span class="text-xs text-slate-600 dark:text-slate-300">Saldo da categoria</span>
                 <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                  <%= link_to "Editar", edit_category_budget_path(budget), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 text-center hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
+                  <%= link_to "Editar", edit_category_budget_path(budget, budget_month: selected_month.strftime("%Y-%m")), data: { turbo_frame: "modal" }, class: "rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 text-center hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" %>
                   <%= link_to "Remover", category_budget_path(budget), data: { turbo_method: :delete, turbo_confirm: "Remover orçamento planejado desta categoria?" }, class: "rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 text-center hover:bg-red-50 dark:border-red-900/70 dark:text-red-300 dark:hover:bg-red-900/20" %>
                 </div>
               </div>

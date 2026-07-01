@@ -4,6 +4,7 @@
 # We avoid `db:prepare` here because this app's checked-in schema.rb was
 # generated on MySQL and may contain adapter-specific options that break on PG.
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+  rm -f /rails/tmp/pids/server.pid
   ./bin/rails db:migrate
 fi
 

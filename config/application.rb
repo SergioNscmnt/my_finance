@@ -21,7 +21,7 @@ module MyFinance
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    config.time_zone = "America/Sao_Paulo"
+    config.time_zone = "America/Cuiaba"
     config.active_record.default_timezone = :local
     config.i18n.available_locales = [:"pt-BR", :en]
     config.i18n.default_locale = :"pt-BR"

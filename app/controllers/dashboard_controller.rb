@@ -6,11 +6,11 @@ class DashboardController < ApplicationController
     # Totais do mês corrente por tipo (considerando parcelas de cartão)
     @receita_total = transactions.select(&:income?).sum { |t| t.monthly_amount_for(Date.current) }
     @despesa_total = transactions.select(&:expense?).sum { |t| t.monthly_amount_for(Date.current) }
-    @balance       = @receita_total - @despesa_total
+    @balance       = Transaction.cumulative_balance_for(transactions, Date.current)
 
-    # Variação mensal (mês atual vs anterior) considerando parcelas
-    this_month = transactions.sum { |t| t.monthly_impact(Date.current) }
-    prev_month = transactions.sum { |t| t.monthly_impact(1.month.ago) }
+    # Variação mensal do saldo acumulado.
+    this_month = @balance
+    prev_month = Transaction.cumulative_balance_for(transactions, 1.month.ago)
     @monthly_change = this_month - prev_month
 
     # Série mensal para gráficos/resumos (com parcelas)
@@ -21,6 +21,7 @@ class DashboardController < ApplicationController
 
     @category_filter  = params[:category].presence
     @category_options = current_user.categories.expense.order(:name).pluck(:name)
+    @selected_budget_month = selected_budget_month
 
     @list_label = "Transações por mês"
     @transactions = current_user.transactions
@@ -29,7 +30,7 @@ class DashboardController < ApplicationController
                                 .to_a
     @transactions_grouped = group_by_month(@transactions)
 
-    load_budget_planner_data(transactions)
+    load_budget_planner_data(transactions, @selected_budget_month)
     load_credit_card_invoice_data(transactions)
     build_chart_data(transactions)
   end
@@ -63,18 +64,7 @@ class DashboardController < ApplicationController
   end
 
   def monthly_reference_months_for(transaction)
-    start_month = transaction.billing_start_month
-    installments = [transaction.installments.to_i, 1].max
-    end_month = start_month + (installments - 1).months
-
-    months = []
-    cursor = start_month
-    while cursor <= end_month
-      months << cursor
-      cursor = cursor.next_month
-    end
-
-    months
+    transaction.billing_months
   end
 
   def build_chart_data(transactions)
@@ -83,6 +73,7 @@ class DashboardController < ApplicationController
     @chart_labels  = months.map { |d| d.strftime("%b/%y") }
     @chart_income  = months.map { |d| transactions.select(&:income?).sum { |t| t.monthly_amount_for(d) } }
     @chart_expense = months.map { |d| transactions.select(&:expense?).sum { |t| t.monthly_amount_for(d) } }
+    @chart_balance = months.map { |d| Transaction.cumulative_balance_for(transactions, d) }
 
     @pie_labels = ["Receitas", "Despesas"]
     @pie_values = [@receita_total, @despesa_total]
@@ -152,14 +143,18 @@ class DashboardController < ApplicationController
       cursor = cursor.next_month
     end
     series_months.index_with do |month|
-      transactions.sum { |t| t.monthly_impact(month) }
+      Transaction.cumulative_balance_for(transactions, month)
     end
   end
 
-  def load_budget_planner_data(transactions)
-    @category_budget = current_user.category_budgets.new
+  def load_budget_planner_data(transactions, budget_month)
+    @category_budget = current_user.category_budgets.new(budget_month: budget_month)
     @budget_categories = current_user.categories.expense.order(:name)
-    @category_budgets = current_user.category_budgets.includes(:category).joins(:category).order("categories.name ASC")
+    @category_budgets = current_user.category_budgets
+                                    .where(budget_month: budget_month)
+                                    .includes(:category)
+                                    .joins(:category)
+                                    .order("categories.name ASC")
     budget_category_ids = @category_budgets.map(&:category_id)
 
     @budget_spent_by_category_id = Hash.new(0.0)
@@ -167,7 +162,7 @@ class DashboardController < ApplicationController
       next unless transaction.expense?
       next unless budget_category_ids.include?(transaction.category_id)
 
-      @budget_spent_by_category_id[transaction.category_id] += transaction.monthly_amount_for(Date.current)
+      @budget_spent_by_category_id[transaction.category_id] += transaction.monthly_amount_for(budget_month)
     end
 
     @budget_remaining_by_category_id = {}
@@ -188,6 +183,24 @@ class DashboardController < ApplicationController
 
     @budget_labels = @category_budgets.map { |budget| budget.category.name }
     @budget_values = @category_budgets.map { |budget| budget.amount.to_f }
+  end
+
+  def selected_budget_month
+    return Date.current.beginning_of_month unless budget_planner_frame_request?
+
+    safe_month(params[:budget_month]) || Date.current.beginning_of_month
+  end
+
+  def budget_planner_frame_request?
+    request.headers["Turbo-Frame"] == "dashboard-budget-planner"
+  end
+
+  def safe_month(raw)
+    return nil if raw.blank?
+
+    Date.parse(raw.to_s).beginning_of_month
+  rescue ArgumentError
+    nil
   end
 
   def load_credit_card_invoice_data(transactions)

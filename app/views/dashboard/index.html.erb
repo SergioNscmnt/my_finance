@@ -25,6 +25,7 @@
         chart_labels: @chart_labels,
         chart_income: @chart_income,
         chart_expense: @chart_expense,
+        chart_balance: @chart_balance,
         pie_labels: @pie_labels,
         pie_values: @pie_values,
         category_labels: @category_labels,
@@ -32,9 +33,10 @@
       } %>
     </div>
 
-    <div id="dashboard-budget-planner">
+    <turbo-frame id="dashboard-budget-planner">
       <%= render "dashboard/budget_planner",
             category_budget: @category_budget,
+            selected_budget_month: @selected_budget_month,
             budget_categories: @budget_categories,
             category_budgets: @category_budgets,
             balance: @balance,
@@ -45,7 +47,7 @@
             budget_spent_by_category_id: @budget_spent_by_category_id,
             budget_remaining_by_category_id: @budget_remaining_by_category_id,
             budget_progress_by_category_id: @budget_progress_by_category_id %>
-    </div>
+    </turbo-frame>
 
     <!-- Lista de transações -->
     <turbo-frame id="dashboard_transactions">

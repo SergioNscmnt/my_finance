@@ -55,7 +55,44 @@ Credenciais seed (alteráveis via `SEED_USER_EMAIL`/`SEED_USER_PASSWORD`):
   ```
 
 ## Testes
-Ainda não configurado (sugestão: adicionar RSpec ou Minitest + system tests).
+Use o fluxo validado localmente:
+```bash
+bin/validate-local
+```
+
+O script sobe o serviço `db` do Docker Compose, prepara os bancos de desenvolvimento e teste e executa `bin/rails test`.
+Ele usa por padrão:
+- MariaDB no host `127.0.0.1`, porta `3307` (`docker-compose.yml` mapeia para a porta interna `3306`)
+- Banco de desenvolvimento: `my_finance_development`
+- Banco de teste: `my_finance_test`
+- Usuário Rails local: `root`
+- Senha Rails local: `rootpassword`
+
+Se o teste falhar com erro de conexão com MySQL, confirme que o banco está ativo:
+```bash
+docker compose ps db
+docker compose up -d db
+```
+
+Se estiver usando WSL e o comando `docker` informar que não está disponível na distro, ative a integração em Docker Desktop > Settings > Resources > WSL Integration.
+
+Também confirme as variáveis usadas pelo Rails local:
+```bash
+DATABASE_HOST=127.0.0.1 \
+DATABASE_PORT=3307 \
+DATABASE_USER=root \
+DATABASE_PASSWORD=rootpassword \
+DATABASE_NAME=my_finance_development \
+DATABASE_NAME_TEST=my_finance_test \
+bin/rails test
+```
+
+Alternativa sem Docker: suba uma instância MariaDB local e aponte o Rails para ela:
+```bash
+DATABASE_HOST=127.0.0.1 DATABASE_PORT=3306 bin/rails db:prepare
+DATABASE_HOST=127.0.0.1 DATABASE_PORT=3306 RAILS_ENV=test bin/rails db:prepare
+DATABASE_HOST=127.0.0.1 DATABASE_PORT=3306 bin/rails test
+```
 
 ## Suporte
 Ajuste variáveis no `docker-compose.yml` ou `.env.example`. Issues/PRs são bem-vindos.

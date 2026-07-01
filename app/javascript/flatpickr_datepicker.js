@@ -25,9 +25,10 @@ export default class FlatpickrDatepicker {
 
   mount(element) {
     if (!element || element._flatpickr) return
+    const config = typeof this.config === "function" ? this.config(element) : this.config
 
     window.flatpickr(element, {
-      ...this.config,
+      ...config,
       altInputClass: element.className
     })
   }

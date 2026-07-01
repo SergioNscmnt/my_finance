@@ -37,6 +37,23 @@ class Transaction < ApplicationRecord
     income? ? value : -value
   end
 
+  def billing_months
+    start_month = billing_start_month
+    installments_count = [installments.to_i, 1].max
+
+    Array.new(installments_count) { |index| start_month + index.months }
+  end
+
+  def self.cumulative_balance_for(transactions, date)
+    month = date.to_date.beginning_of_month
+
+    transactions.sum do |transaction|
+      transaction.billing_months.sum do |billing_month|
+        billing_month <= month ? transaction.monthly_impact(billing_month) : 0
+      end
+    end
+  end
+
   def display_amount
     credit_card? && installments.to_i > 1 ? per_installment_amount : amount
   end

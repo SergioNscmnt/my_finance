@@ -26,9 +26,10 @@
 <% end %>
 
 <%= turbo_stream.replace "dashboard-budget-planner" do %>
-  <div id="dashboard-budget-planner">
+  <turbo-frame id="dashboard-budget-planner">
     <%= render "dashboard/budget_planner",
           category_budget: @dashboard_data[:category_budget],
+          selected_budget_month: @dashboard_data[:selected_budget_month],
           budget_categories: @dashboard_data[:budget_categories],
           category_budgets: @dashboard_data[:category_budgets],
           balance: @dashboard_data[:balance],
@@ -39,5 +40,5 @@
           budget_spent_by_category_id: @dashboard_data[:budget_spent_by_category_id],
           budget_remaining_by_category_id: @dashboard_data[:budget_remaining_by_category_id],
           budget_progress_by_category_id: @dashboard_data[:budget_progress_by_category_id] %>
-  </div>
+  </turbo-frame>
 <% end %>

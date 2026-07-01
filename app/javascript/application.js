@@ -10,10 +10,6 @@ import MobileMenuController from "./controllers/mobile_menu_controller"
 import ThemeController from "./controllers/theme_controller"
 import BuyOrderController from "./controllers/buy_order_controller"
 import ToastController from "./controllers/toast_controller"
-import LiveFxController from "./controllers/live_fx_controller"
-import AssetFormController from "./controllers/asset_form_controller"
-import LiveAssetQuoteController from "./controllers/live_asset_quote_controller"
-import QuotesController from "./controllers/quotes_controller"
 import FlatpickrDatepicker from "./flatpickr_datepicker"
 
 const application = Application.start()
@@ -31,10 +27,6 @@ application.register("mobile-menu", MobileMenuController)
 application.register("theme", ThemeController)
 application.register("buy-order", BuyOrderController)
 application.register("toast", ToastController)
-application.register("live-fx", LiveFxController)
-application.register("asset-form", AssetFormController)
-application.register("live-asset-quote", LiveAssetQuoteController)
-application.register("quotes", QuotesController)
 
 const withController = (element, controllerName) => {
   const current = (element.getAttribute("data-controller") || "").trim()
@@ -65,18 +57,47 @@ const flatpickrDatepicker = new FlatpickrDatepicker({
   }
 })
 
+const flatpickrMonthPicker = new FlatpickrDatepicker({
+  selectors: ["#flatpickr-budget-month"],
+  config: () => {
+    const monthSelectPlugin = window.monthSelectPlugin
+    const plugins = monthSelectPlugin ? [
+      new monthSelectPlugin({
+        shorthand: false,
+        dateFormat: "Y-m-d",
+        altFormat: "F/Y"
+      })
+    ] : []
+
+    return {
+      monthSelectorType: "static",
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "F/Y",
+      locale: (window.flatpickr && window.flatpickr.l10ns && window.flatpickr.l10ns.pt) || "pt",
+      plugins,
+      onChange: (_selectedDates, _dateStr, instance) => {
+        instance.input.closest("form")?.requestSubmit()
+      }
+    }
+  }
+})
+
 window.addEventListener("load", () => {
   enhanceFormControls()
   flatpickrDatepicker.init()
+  flatpickrMonthPicker.init()
 })
 
 document.addEventListener("turbo:load", () => {
   enhanceFormControls()
   flatpickrDatepicker.init()
+  flatpickrMonthPicker.init()
 })
 document.addEventListener("turbo:frame-load", (event) => {
   enhanceFormControls(event.target)
   flatpickrDatepicker.init(event.target)
+  flatpickrMonthPicker.init(event.target)
 })
 
 const observer = new MutationObserver((mutations) => {
@@ -85,6 +106,7 @@ const observer = new MutationObserver((mutations) => {
       if (node.nodeType !== Node.ELEMENT_NODE) return
       enhanceFormControls(node)
       flatpickrDatepicker.init(node)
+      flatpickrMonthPicker.init(node)
     })
   })
 })

@@ -1,6 +1,8 @@
 <% frame_id = local_assigns[:frame_id] || "_top" %>
 
 <%= form_with model: category_budget, data: { turbo_frame: frame_id }, class: "grid grid-cols-1 gap-4" do |f| %>
+  <%= f.hidden_field :budget_month, value: category_budget.budget_month&.strftime("%Y-%m-%d") %>
+
   <div class="space-y-1">
     <%= f.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
     <%= f.select :category_id,

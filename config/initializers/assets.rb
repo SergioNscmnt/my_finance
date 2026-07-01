@@ -14,7 +14,3 @@ Rails.application.config.assets.paths << Rails.root.join("app/javascript")
 Rails.application.config.assets.precompile += Dir[Rails.root.join("app/javascript/controllers/*.js")].map do |path|
   "controllers/#{File.basename(path)}"
 end
-Rails.application.config.assets.precompile += %w[
-  controllers/asset_form_controller.js
-  controllers/live_asset_quote_controller.js
-]

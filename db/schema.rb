@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
-  create_table "allocation_targets", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+ActiveRecord::Schema[7.1].define(version: 2026_03_01_120000) do
+  create_table "allocation_targets", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.integer "asset_class", null: false
     t.decimal "target_percentage", precision: 5, scale: 2, null: false
@@ -21,7 +21,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["wallet_id"], name: "index_allocation_targets_on_wallet_id"
   end
 
-  create_table "assets", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "assets", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "name", null: false
     t.string "ticker", null: false
@@ -40,7 +40,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["wallet_id"], name: "index_assets_on_wallet_id"
   end
 
-  create_table "candles", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "candles", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.string "timeframe", null: false
     t.datetime "timestamp", null: false
@@ -56,7 +56,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["asset_id"], name: "index_candles_on_asset_id"
   end
 
-  create_table "cash_accounts", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "cash_accounts", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "portfolio_id", null: false
     t.string "currency", null: false
     t.decimal "balance", precision: 20, scale: 8, default: "0.0", null: false
@@ -66,7 +66,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["portfolio_id"], name: "index_cash_accounts_on_portfolio_id"
   end
 
-  create_table "categories", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "categories", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
     t.integer "kind", default: 0, null: false
     t.bigint "user_id", null: false
@@ -82,18 +82,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
-  create_table "category_budgets", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "category_budgets", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "category_id", null: false
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "budget_month", null: false
     t.index ["category_id"], name: "index_category_budgets_on_category_id"
-    t.index ["user_id", "category_id"], name: "index_category_budgets_on_user_id_and_category_id", unique: true
+    t.index ["user_id", "category_id", "budget_month"], name: "index_category_budgets_on_user_category_month", unique: true
     t.index ["user_id"], name: "index_category_budgets_on_user_id"
   end
 
-  create_table "credit_card_invoices", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "credit_card_invoices", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "category_id", null: false
     t.date "billing_month", null: false
@@ -110,7 +111,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["user_id"], name: "index_credit_card_invoices_on_user_id"
   end
 
-  create_table "dividends", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "dividends", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.bigint "asset_id", null: false
     t.integer "kind", null: false
@@ -124,7 +125,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["wallet_id"], name: "index_dividends_on_wallet_id"
   end
 
-  create_table "fx_rates", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "fx_rates", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "base_currency", null: false
     t.string "quote_currency", null: false
     t.decimal "rate", precision: 20, scale: 10, null: false
@@ -137,7 +138,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["base_currency", "quote_currency", "retrieved_at"], name: "index_fx_rates_on_pair_and_retrieved_at"
   end
 
-  create_table "investment_goals", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "investment_goals", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "name", null: false
     t.integer "goal_type", default: 3, null: false
@@ -149,7 +150,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["wallet_id"], name: "index_investment_goals_on_wallet_id"
   end
 
-  create_table "investment_transactions", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "investment_transactions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.bigint "asset_id", null: false
     t.integer "kind", null: false
@@ -165,7 +166,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["wallet_id"], name: "index_investment_transactions_on_wallet_id"
   end
 
-  create_table "ledger_entries", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "ledger_entries", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "portfolio_id", null: false
     t.integer "entry_type", null: false
     t.string "currency", null: false
@@ -180,7 +181,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.check_constraint "json_valid(`metadata`)", name: "metadata"
   end
 
-  create_table "market_instruments", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "market_instruments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "ticker", null: false
     t.string "name", null: false
     t.integer "asset_type", null: false
@@ -196,7 +197,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["ticker"], name: "index_market_instruments_on_ticker", unique: true
   end
 
-  create_table "orders", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "orders", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "portfolio_id", null: false
     t.bigint "asset_id", null: false
     t.integer "side", null: false
@@ -216,7 +217,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["portfolio_id"], name: "index_orders_on_portfolio_id"
   end
 
-  create_table "portfolios", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "portfolios", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "base_currency", default: "BRL", null: false
     t.datetime "created_at", null: false
@@ -225,7 +226,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["user_id"], name: "index_portfolios_on_user_id"
   end
 
-  create_table "positions", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "positions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "portfolio_id", null: false
     t.bigint "asset_id", null: false
     t.decimal "quantity", precision: 24, scale: 10, default: "0.0", null: false
@@ -239,7 +240,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["portfolio_id"], name: "index_positions_on_portfolio_id"
   end
 
-  create_table "quotes", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "quotes", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.decimal "price", precision: 20, scale: 8, null: false
     t.decimal "change_percent", precision: 12, scale: 6
@@ -253,7 +254,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["asset_id"], name: "index_quotes_on_asset_id"
   end
 
-  create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "title", null: false
     t.decimal "amount", precision: 12, scale: 2, null: false
     t.integer "kind", null: false
@@ -270,7 +271,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["user_id"], name: "index_transactions_on_user_id"
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "users", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -279,7 +280,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_100800) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
-  create_table "wallets", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "wallets", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "name", null: false
     t.string "currency", default: "BRL", null: false
