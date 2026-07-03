@@ -54,6 +54,30 @@ Credenciais seed (alteráveis via `SEED_USER_EMAIL`/`SEED_USER_PASSWORD`):
   bin/rails assets:clobber && bin/rails tailwindcss:build && bin/rails assets:precompile
   ```
 
+## Bot WhatsApp com Evolution API
+
+A integração recebe mensagens pela Evolution API e cria transações para números autorizados em `Minha conta > WhatsApp`.
+
+Variáveis necessárias:
+```bash
+EVOLUTION_API_BASE_URL=https://sua-evolution-api.example.com
+EVOLUTION_API_KEY=sua_api_key
+EVOLUTION_INSTANCE_NAME=my_finance
+EVOLUTION_WEBHOOK_TOKEN=um_token_compartilhado
+```
+
+Configure o webhook da instância na Evolution API apontando para:
+```text
+POST https://seu-dominio.example.com/webhooks/evolution
+```
+
+Use o evento `MESSAGES_UPSERT` e envie o segredo no header:
+```text
+X-Evolution-Webhook-Token: <EVOLUTION_WEBHOOK_TOKEN>
+```
+
+Depois, acesse `Minha conta`, cadastre o telefone autorizado e a instância Evolution. Use o botão `Testar` para validar o envio de mensagem pelo WhatsApp antes de usar o bot para registrar receitas e despesas.
+
 ## Testes
 Use o fluxo validado localmente:
 ```bash

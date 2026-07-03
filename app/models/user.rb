@@ -4,6 +4,8 @@ class User < ApplicationRecord
   has_many :categories, dependent: :destroy
   has_many :category_budgets, dependent: :destroy
   has_many :credit_card_invoices, dependent: :destroy
+  has_many :whatsapp_accounts, dependent: :destroy
+  has_many :evolution_webhook_events, dependent: :nullify
   has_many :transactions, dependent: :destroy
 
   after_create :ensure_default_categories

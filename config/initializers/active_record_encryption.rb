@@ -20,6 +20,12 @@ unless Rails.env.production?
   key_derivation_salt ||= development_encryption_key(:key_derivation_salt)
 end
 
+if ENV["SECRET_KEY_BASE_DUMMY"].present?
+  primary_key ||= development_encryption_key(:dummy_primary_key)
+  deterministic_key ||= development_encryption_key(:dummy_deterministic_key)
+  key_derivation_salt ||= development_encryption_key(:dummy_key_derivation_salt)
+end
+
 if [primary_key, deterministic_key, key_derivation_salt].any?(&:blank?)
   raise "Active Record Encryption keys are missing. Set ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY, ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY and ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT."
 end

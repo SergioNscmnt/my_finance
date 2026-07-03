@@ -10,6 +10,7 @@ import MobileMenuController from "./controllers/mobile_menu_controller"
 import ThemeController from "./controllers/theme_controller"
 import BuyOrderController from "./controllers/buy_order_controller"
 import ToastController from "./controllers/toast_controller"
+import GlobalSearchController from "./controllers/global_search_controller"
 import FlatpickrDatepicker from "./flatpickr_datepicker"
 
 const application = Application.start()
@@ -27,6 +28,7 @@ application.register("mobile-menu", MobileMenuController)
 application.register("theme", ThemeController)
 application.register("buy-order", BuyOrderController)
 application.register("toast", ToastController)
+application.register("global-search", GlobalSearchController)
 
 const withController = (element, controllerName) => {
   const current = (element.getAttribute("data-controller") || "").trim()

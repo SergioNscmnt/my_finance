@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_03_131000) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_03_140100) do
   create_table "allocation_targets", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.integer "asset_class", null: false
@@ -123,6 +123,32 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_03_131000) do
     t.index ["asset_id"], name: "index_dividends_on_asset_id"
     t.index ["wallet_id", "paid_on"], name: "index_dividends_on_wallet_id_and_paid_on"
     t.index ["wallet_id"], name: "index_dividends_on_wallet_id"
+  end
+
+  create_table "evolution_webhook_events", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "whatsapp_account_id"
+    t.bigint "transaction_id"
+    t.string "event_name", null: false
+    t.string "instance_name", null: false
+    t.string "sender_phone", null: false
+    t.string "message_id", null: false
+    t.string "message_type"
+    t.text "message_text"
+    t.boolean "from_me", default: false, null: false
+    t.text "payload", size: :long, null: false, collation: "utf8mb4_bin"
+    t.integer "status", default: 0, null: false
+    t.text "error_message"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_name"], name: "index_evolution_webhook_events_on_event_name"
+    t.index ["instance_name", "sender_phone", "message_id"], name: "index_evolution_events_on_instance_sender_message", unique: true
+    t.index ["status"], name: "index_evolution_webhook_events_on_status"
+    t.index ["transaction_id"], name: "index_evolution_webhook_events_on_transaction_id"
+    t.index ["user_id"], name: "index_evolution_webhook_events_on_user_id"
+    t.index ["whatsapp_account_id"], name: "index_evolution_webhook_events_on_whatsapp_account_id"
+    t.check_constraint "json_valid(`payload`)", name: "payload"
   end
 
   create_table "fx_rates", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
@@ -289,6 +315,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_03_131000) do
     t.index ["user_id"], name: "index_wallets_on_user_id"
   end
 
+  create_table "whatsapp_accounts", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "phone_number", null: false
+    t.string "instance_name", null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "last_seen_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enabled"], name: "index_whatsapp_accounts_on_enabled"
+    t.index ["instance_name", "phone_number"], name: "index_whatsapp_accounts_on_instance_name_and_phone_number", unique: true
+    t.index ["user_id"], name: "index_whatsapp_accounts_on_user_id"
+  end
+
   add_foreign_key "allocation_targets", "wallets"
   add_foreign_key "assets", "wallets"
   add_foreign_key "candles", "assets"
@@ -300,6 +339,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_03_131000) do
   add_foreign_key "credit_card_invoices", "users"
   add_foreign_key "dividends", "assets"
   add_foreign_key "dividends", "wallets"
+  add_foreign_key "evolution_webhook_events", "transactions"
+  add_foreign_key "evolution_webhook_events", "users"
+  add_foreign_key "evolution_webhook_events", "whatsapp_accounts"
   add_foreign_key "investment_goals", "wallets"
   add_foreign_key "investment_transactions", "assets"
   add_foreign_key "investment_transactions", "wallets"
@@ -313,4 +355,5 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_03_131000) do
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "users"
   add_foreign_key "wallets", "users"
+  add_foreign_key "whatsapp_accounts", "users"
 end

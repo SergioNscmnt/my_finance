@@ -99,6 +99,9 @@ module ApplicationHelper
       { d: "M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" },
       { d: "m22 7-10 6L2 7" }
     ],
+    "message-circle" => [
+      { d: "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8Z" }
+    ],
     "map" => [
       { d: "M9 18 3 21V6l6-3 6 3 6-3v15l-6 3-6-3Z" },
       { d: "M9 3v15" },
@@ -136,6 +139,14 @@ module ApplicationHelper
       { d: "M8 3v6h8V3" },
       { d: "M8 21v-7h8v7" }
     ],
+    "search" => [
+      { d: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" },
+      { d: "m21 21-4.35-4.35" }
+    ],
+    "send" => [
+      { d: "m22 2-7 20-4-9-9-4Z" },
+      { d: "M22 2 11 13" }
+    ],
     "tag" => [
       { d: "M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z" },
       { d: "M7 7h.01" }
@@ -144,6 +155,13 @@ module ApplicationHelper
       { d: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" },
       { d: "M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" },
       { d: "M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" }
+    ],
+    "trash" => [
+      { d: "M3 6h18" },
+      { d: "M8 6V4h8v2" },
+      { d: "M19 6l-1 15H6L5 6" },
+      { d: "M10 11v6" },
+      { d: "M14 11v6" }
     ],
     "utensils" => [
       { d: "M4 3v7" },
@@ -224,6 +242,19 @@ module ApplicationHelper
       end
 
     icon_svg(icon_name, class_name: class_name)
+  end
+
+  def whatsapp_phone_display(phone_number)
+    digits = phone_number.to_s.gsub(/\D/, "")
+    return phone_number if digits.length < 10
+
+    country = digits.length > 11 ? "+#{digits[0..1]} " : ""
+    local = digits.length > 11 ? digits[2..] : digits
+    area = local[0..1]
+    number = local[2..]
+    formatted_number = number.length == 9 ? "#{number[0..4]}-#{number[5..]}" : "#{number[0..3]}-#{number[4..]}"
+
+    "#{country}(#{area}) #{formatted_number}"
   end
 
   private

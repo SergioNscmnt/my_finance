@@ -1,0 +1,64 @@
+<% total_results = @transactions.size + @categories.size + @category_budgets.size + @credit_card_invoices.size %>
+
+<% if @query.blank? %>
+  <div class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Digite ao menos 2 caracteres para pesquisar.</div>
+<% elsif total_results.zero? %>
+  <div class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Nenhum resultado encontrado.</div>
+<% else %>
+  <div class="max-h-96 overflow-y-auto py-2">
+    <% if @transactions.any? %>
+      <p class="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Transações</p>
+      <% @transactions.each do |transaction| %>
+        <%= link_to edit_transaction_path(transaction), data: { turbo_frame: "modal" }, class: "flex items-center justify-between gap-3 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/70" do %>
+          <span class="min-w-0">
+            <span class="block truncate font-medium text-slate-900 dark:text-slate-100"><%= transaction.title %></span>
+            <span class="block truncate text-xs text-slate-500 dark:text-slate-400"><%= transaction.category&.name || "Sem categoria" %> · <%= l(transaction.occurred_on) %></span>
+          </span>
+          <span class="shrink-0 text-xs font-semibold <%= transaction.income? ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' %>"><%= number_to_currency(transaction.display_amount) %></span>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if @categories.any? %>
+      <p class="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categorias</p>
+      <% @categories.each do |category| %>
+        <%= link_to edit_category_path(category), data: { turbo_frame: "modal" }, class: "flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/70" do %>
+          <span class="text-slate-500 dark:text-slate-400"><%= category_icon(category, class_name: "h-4 w-4 shrink-0") %></span>
+          <span class="min-w-0">
+            <span class="block truncate font-medium text-slate-900 dark:text-slate-100"><%= category.name %></span>
+            <span class="block truncate text-xs text-slate-500 dark:text-slate-400"><%= category.income? ? "Receita" : "Despesa" %><%= category.card_bank.present? ? " · #{category.card_bank}" : "" %></span>
+          </span>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if @category_budgets.any? %>
+      <p class="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Orçamentos</p>
+      <% @category_budgets.each do |budget| %>
+        <%= link_to dashboard_path(budget_month: budget.budget_month.strftime("%Y-%m")), class: "flex items-center justify-between gap-3 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/70" do %>
+          <span class="min-w-0">
+            <span class="block truncate font-medium text-slate-900 dark:text-slate-100"><%= budget.category.name %></span>
+            <span class="block truncate text-xs text-slate-500 dark:text-slate-400"><%= l(budget.budget_month, format: "%B %Y") %></span>
+          </span>
+          <span class="shrink-0 text-xs font-semibold text-slate-700 dark:text-slate-200"><%= number_to_currency(budget.amount) %></span>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if @credit_card_invoices.any? %>
+      <p class="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Faturas</p>
+      <% @credit_card_invoices.each do |invoice| %>
+        <div class="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+          <span class="min-w-0">
+            <span class="block truncate font-medium text-slate-900 dark:text-slate-100"><%= invoice.category.name %></span>
+            <span class="block truncate text-xs text-slate-500 dark:text-slate-400"><%= l(invoice.billing_month, format: "%B %Y") %> · vence <%= l(invoice.due_on) %></span>
+          </span>
+          <span class="shrink-0 text-xs font-semibold text-slate-700 dark:text-slate-200"><%= number_to_currency(invoice.total_amount) %></span>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex justify-end border-t border-slate-200 px-4 py-2 dark:border-slate-700">
+    <%= link_to "Ver resultados", search_path(q: @query), class: "inline-flex items-center justify-center rounded-md bg-blue-600 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-700" %>
+  </div>
+<% end %>
