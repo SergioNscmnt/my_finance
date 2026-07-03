@@ -45,6 +45,8 @@ class DashboardController < ApplicationController
 
   def group_by_month(transactions)
     entries = transactions.flat_map do |transaction|
+      next [] if transaction.occurred_on < Date.current
+
       monthly_reference_months_for(transaction).filter_map do |month|
         next if transaction.monthly_amount_for(month).zero?
 
@@ -177,7 +179,7 @@ class DashboardController < ApplicationController
       @budget_progress_by_category_id[budget.category_id] = progress
     end
 
-    @planned_budget_total = @category_budgets.sum(:amount)
+    @planned_budget_total = @category_budgets.to_a.sum { |budget| budget.amount.to_d }
     # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
     @available_after_budget = @balance
 

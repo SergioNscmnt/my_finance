@@ -9,7 +9,10 @@
     <p class="text-sm text-slate-600 dark:text-slate-400">Olá, <span class="font-semibold text-slate-900 dark:text-slate-100"><%= current_user.name %></span></p>
     <div class="flex items-center gap-2">
       <div>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Saldo do mês</p>
+        <p class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <span class="text-slate-500 dark:text-slate-400"><%= icon_svg("wallet") %></span>
+          Saldo do mês
+        </p>
         <div class="flex items-center gap-2">
           <p class="text-3xl font-semibold text-slate-900 dark:text-slate-100">
             <span data-privacy-target="value"><%= number_to_currency(balance) %></span>
@@ -54,9 +57,12 @@
 
 <% if due_soon_invoices.any? || current_month_invoices.any? %>
   <section class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-    <article class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/70 dark:bg-amber-900/20">
+    <article class="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/70 dark:bg-amber-900/20">
       <div class="mb-2 flex items-center justify-between gap-3">
-        <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-200">Alertas de vencimento</h3>
+        <h3 class="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-200">
+          <%= icon_svg("alert-triangle") %>
+          Alertas de vencimento
+        </h3>
         <span class="text-xs font-medium text-amber-700 dark:text-amber-300"><%= due_soon_invoices.size %> alerta(s)</span>
       </div>
       <% if due_soon_invoices.any? %>
@@ -68,7 +74,10 @@
             <div class="rounded-lg border border-amber-200 bg-white/70 px-3 py-2 dark:border-amber-900/70 dark:bg-slate-900/40">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="min-w-0">
-                  <p class="text-sm font-semibold text-amber-900 dark:text-amber-200"><%= invoice.category.name %></p>
+                  <p class="flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-200">
+                    <%= category_icon(invoice.category, class_name: "h-4 w-4 shrink-0") %>
+                    <%= invoice.category.name %>
+                  </p>
                   <p class="text-xs text-amber-800/90 dark:text-amber-300">
                     Vencimento: <strong><%= l(invoice.due_on, format: :default) %></strong> ·
                     Valor: <strong data-privacy-target="value"><%= number_to_currency(invoice.total_amount) %></strong>
@@ -84,9 +93,12 @@
       <% end %>
     </article>
 
-    <article class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div class="mb-2 flex items-center justify-between gap-3">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Fatura do mês atual</h3>
+        <h3 class="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <span class="text-blue-600 dark:text-blue-300"><%= icon_svg("credit-card") %></span>
+          Fatura do mês atual
+        </h3>
         <span class="text-xs text-slate-500 dark:text-slate-400"><%= current_month_invoices.size %> cartão(ões)</span>
       </div>
       <% if current_month_invoices.any? %>
@@ -95,7 +107,10 @@
             <div class="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700">
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <p class="text-sm font-medium text-slate-900 dark:text-slate-100"><%= invoice.category.name %></p>
+                  <p class="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                    <%= category_icon(invoice.category, class_name: "h-4 w-4 shrink-0") %>
+                    <%= invoice.category.name %>
+                  </p>
                   <p class="text-xs text-slate-500 dark:text-slate-400">
                     Vencimento: <%= l(invoice.due_on, format: :default) %>
                   </p>

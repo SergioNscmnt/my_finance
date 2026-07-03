@@ -91,7 +91,7 @@ class CategoryBudgetsController < ApplicationController
       @budget_progress_by_category_id[budget.category_id] = progress
     end
 
-    @planned_budget_total = @category_budgets.sum(:amount)
+    @planned_budget_total = @category_budgets.to_a.sum { |budget| budget.amount.to_d }
     # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
     @available_after_budget = @balance
     @budget_labels = @category_budgets.map { |budget| budget.category.name }

@@ -1,9 +1,13 @@
 <tr id="<%= dom_id(category) %>" class="hover:bg-slate-50 dark:hover:bg-slate-800">
   <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">
     <div class="flex flex-wrap items-center gap-2">
-      <span><%= category.name %></span>
+      <span class="inline-flex items-center gap-2">
+        <%= category_icon(category, class_name: "h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400") %>
+        <%= category.name %>
+      </span>
       <% if category.credit_card? %>
-        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+          <%= icon_svg("credit-card", class_name: "h-3.5 w-3.5 shrink-0") %>
           <%= category.card_bank.presence || "Cartão" %> | fecha <%= category.statement_closing_day %> | vence <%= category.statement_due_day %>
         </span>
       <% end %>
@@ -18,7 +22,7 @@
       title="<%= kind_label %>"
       aria-label="Tipo da categoria: <%= kind_label %>"
     >
-      <span class="h-2.5 w-2.5 rounded-full <%= is_expense ? 'bg-amber-500 dark:bg-amber-400' : 'bg-emerald-500 dark:bg-emerald-400' %>"></span>
+      <%= icon_svg(is_expense ? "arrow-up-right" : "arrow-down-left", class_name: "h-3.5 w-3.5 shrink-0") %>
       <span class="uppercase tracking-wide"><%= kind_label %></span>
     </span>
   </td>

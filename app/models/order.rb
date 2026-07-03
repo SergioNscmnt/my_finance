@@ -1,4 +1,6 @@
 class Order < ApplicationRecord
+  encrypts_decimal :quantity, :filled_price, :fees
+
   belongs_to :portfolio
   belongs_to :asset
 
@@ -12,9 +14,14 @@ class Order < ApplicationRecord
   validates :fees, numericality: { greater_than_or_equal_to: 0 }
   validates :requested_at, presence: true
 
+  before_validation :set_defaults
   before_validation :normalize_provider
 
   private
+
+  def set_defaults
+    self.fees = 0 if fees.nil?
+  end
 
   def normalize_provider
     self.provider = provider.to_s.strip.downcase.presence

@@ -1,18 +1,27 @@
 <section class="w-full px-4 space-y-6 sm:px-6 lg:px-8">
   <header class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <p class="text-sm text-slate-500 dark:text-slate-400">Preferências</p>
-    <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Minha conta</h1>
+    <p class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+      <%= icon_svg("user", class_name: "h-4 w-4 shrink-0") %>
+      Preferências
+    </p>
+    <h1 class="mt-1 flex items-center gap-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      <span class="text-blue-600 dark:text-blue-300"><%= icon_svg("user", class_name: "h-6 w-6 shrink-0") %></span>
+      Minha conta
+    </h1>
     <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Atualize seus dados e altere sua senha.</p>
   </header>
 
   <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dados principais</h2>
+    <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+      <span class="text-emerald-600 dark:text-emerald-300"><%= icon_svg("user") %></span>
+      Dados principais
+    </h2>
     <p class="text-sm text-slate-500 dark:text-slate-400">Nome e e-mail usados para login e identificação.</p>
 
     <%= form_with model: @user, url: account_path, method: :patch, class: "mt-4 space-y-4" do |f| %>
       <% if @user.errors.any? %>
         <div class="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <p class="font-semibold">Corrija os erros abaixo:</p>
+          <p class="flex items-center gap-2 font-semibold"><%= icon_svg("alert-triangle") %> Corrija os erros abaixo:</p>
           <ul class="mt-2 list-disc pl-5">
             <% @user.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -23,32 +32,50 @@
 
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <%= f.label :name, "Nome", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= f.label :name, class: "inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-200" do %>
+            <%= icon_svg("user", class_name: "h-3.5 w-3.5 shrink-0") %>
+            Nome
+          <% end %>
           <%= f.text_field :name, class: "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" %>
         </div>
         <div>
-          <%= f.label :email, "E-mail", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+          <%= f.label :email, class: "inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-200" do %>
+            <%= icon_svg("mail", class_name: "h-3.5 w-3.5 shrink-0") %>
+            E-mail
+          <% end %>
           <%= f.email_field :email, class: "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" %>
         </div>
       </div>
 
       <div class="border-t border-slate-200 pt-4 dark:border-slate-700">
-        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Alterar senha</h3>
+        <h3 class="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+          <span class="text-amber-600 dark:text-amber-300"><%= icon_svg("lock") %></span>
+          Alterar senha
+        </h3>
         <p class="text-sm text-slate-500 dark:text-slate-400">Deixe em branco para manter a senha atual.</p>
         <div class="mt-3 grid gap-4 md:grid-cols-2">
           <div>
-            <%= f.label :password, "Nova senha", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+            <%= f.label :password, class: "inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-200" do %>
+              <%= icon_svg("lock", class_name: "h-3.5 w-3.5 shrink-0") %>
+              Nova senha
+            <% end %>
             <%= f.password_field :password, class: "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" %>
           </div>
           <div>
-            <%= f.label :password_confirmation, "Confirmar nova senha", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+            <%= f.label :password_confirmation, class: "inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-200" do %>
+              <%= icon_svg("lock", class_name: "h-3.5 w-3.5 shrink-0") %>
+              Confirmar nova senha
+            <% end %>
             <%= f.password_field :password_confirmation, class: "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" %>
           </div>
         </div>
       </div>
 
       <div class="flex">
-        <%= f.submit "Salvar alterações", class: "rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 w-full sm:w-auto sm:ml-auto" %>
+        <%= f.button type: "submit", class: "inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400 sm:w-auto sm:ml-auto" do %>
+          <%= icon_svg("save", class_name: "h-4 w-4 shrink-0") %>
+          Salvar alterações
+        <% end %>
       </div>
     <% end %>
   </section>

@@ -1,4 +1,6 @@
 class LedgerEntry < ApplicationRecord
+  encrypts_decimal :amount
+
   belongs_to :portfolio
 
   enum entry_type: {

@@ -1,4 +1,6 @@
 class Dividend < ApplicationRecord
+  encrypts_decimal :amount
+
   belongs_to :wallet
   belongs_to :asset
 

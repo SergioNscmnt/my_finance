@@ -5,7 +5,8 @@ export default class extends Controller {
     type: String,
     labels: Array,
     datasets: Array,
-    axis: String
+    axis: String,
+    legend: { type: Boolean, default: true }
   }
 
   connect() {
@@ -48,6 +49,7 @@ export default class extends Controller {
         indexAxis,
         plugins: {
           legend: {
+            display: this.legendValue,
             position: "bottom",
             labels: { color: textColor }
           },

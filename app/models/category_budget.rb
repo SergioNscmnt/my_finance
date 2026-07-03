@@ -1,4 +1,6 @@
 class CategoryBudget < ApplicationRecord
+  encrypts_decimal :amount
+
   belongs_to :user
   belongs_to :category
 

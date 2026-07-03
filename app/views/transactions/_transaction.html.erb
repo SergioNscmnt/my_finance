@@ -1,18 +1,30 @@
 <tr id="<%= dom_id(transaction) %>" class="hover:bg-slate-50 dark:hover:bg-slate-800">
-  <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100"><%= transaction.title %></td>
+  <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">
+    <span class="inline-flex items-center gap-2">
+      <span class="<%= transaction.income? ? 'text-emerald-600 dark:text-emerald-300' : 'text-amber-600 dark:text-amber-300' %>"><%= icon_svg(transaction.income? ? "arrow-down-left" : "arrow-up-right") %></span>
+      <%= transaction.title %>
+    </span>
+  </td>
   <td class="px-4 py-3 text-sm">
     <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold <%= transaction.income? ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200' %>">
       <%= transaction.income? ? 'Receita' : 'Despesa' %>
     </span>
   </td>
   <td class="px-4 py-3 text-sm font-semibold <%= transaction.income? ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' %>">
-    <%= transaction.income? ? '+' : '-' %> <%= number_to_currency(transaction.display_amount) %>
+    <span class="inline-flex items-center gap-1.5">
+      <%= icon_svg("circle-dollar", class_name: "h-3.5 w-3.5 shrink-0") %>
+      <%= transaction.income? ? '+' : '-' %> <%= number_to_currency(transaction.display_amount) %>
+    </span>
     <% if transaction.credit_card? && transaction.installments.to_i > 1 %>
       <span class="ml-1 text-xs text-slate-500 dark:text-slate-400">(total <%= number_to_currency(transaction.amount) %> em <%= transaction.installments %>x)</span>
     <% end %>
   </td>
-  <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200"><%= l(transaction.occurred_on) %></td>
-  <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200"><%= transaction.category.name %></td>
+  <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+    <span class="inline-flex items-center gap-1.5"><%= icon_svg("calendar", class_name: "h-3.5 w-3.5 shrink-0") %><%= l(transaction.occurred_on) %></span>
+  </td>
+  <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+    <span class="inline-flex items-center gap-1.5"><%= category_icon(transaction.category, class_name: "h-3.5 w-3.5 shrink-0") %><%= transaction.category.name %></span>
+  </td>
   <td class="px-4 py-3 text-sm text-right">
     <div class="flex w-full justify-end gap-2">
       <%= link_to "Editar", edit_transaction_path(transaction), data: { turbo_frame: "modal" }, class: "rounded-md bg-blue-50 px-3 py-1.5 font-medium text-blue-700 hover:bg-blue-100 focus:outline focus:outline-2 focus:outline-blue-400 dark:bg-blue-900/30 dark:text-blue-200 dark:hover:bg-blue-900/50" %>

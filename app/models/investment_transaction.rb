@@ -1,8 +1,12 @@
 class InvestmentTransaction < ApplicationRecord
+  encrypts_decimal :quantity, :price, :fees
+
   belongs_to :wallet
   belongs_to :asset
 
   enum kind: { buy: 0, sell: 1 }
+
+  before_validation :set_defaults
 
   validates :kind, presence: true
   validates :occurred_on, presence: true
@@ -15,6 +19,10 @@ class InvestmentTransaction < ApplicationRecord
   scope :ordered, -> { order(occurred_on: :asc, id: :asc) }
 
   private
+
+  def set_defaults
+    self.fees = 0 if fees.nil?
+  end
 
   def buy_or_sell_requires_price
     return unless (buy? || sell?) && price.to_d <= 0

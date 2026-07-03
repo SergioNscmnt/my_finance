@@ -1,4 +1,6 @@
 class Transaction < ApplicationRecord
+  encrypts_decimal :amount
+
   belongs_to :category
   belongs_to :user
 

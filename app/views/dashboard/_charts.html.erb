@@ -13,7 +13,10 @@
 <section class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
   <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
     <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-      <h3 class="text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">Fluxo mensal</h3>
+      <h3 class="flex items-center gap-2 text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">
+        <span class="text-blue-600 dark:text-blue-300"><%= icon_svg("chart-line") %></span>
+        Fluxo mensal
+      </h3>
       <%= form_with url: dashboard_path, method: :get, local: true, class: "flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400" do %>
         <label for="months" class="font-medium whitespace-nowrap">Período</label>
         <%= select_tag :months,
@@ -25,15 +28,15 @@
     </div>
     <div class="mb-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
       <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-800/50">
-        <p class="text-slate-500 dark:text-slate-400">Receitas</p>
+        <p class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400"><%= icon_svg("arrow-down-left", class_name: "h-3.5 w-3.5 shrink-0") %> Receitas</p>
         <p class="mt-0.5 font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums" data-privacy-target="value"><%= number_to_currency(flow_total_income) %></p>
       </div>
       <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-800/50">
-        <p class="text-slate-500 dark:text-slate-400">Despesas</p>
+        <p class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400"><%= icon_svg("arrow-up-right", class_name: "h-3.5 w-3.5 shrink-0") %> Despesas</p>
         <p class="mt-0.5 font-semibold text-amber-700 dark:text-amber-400 tabular-nums" data-privacy-target="value"><%= number_to_currency(flow_total_expense) %></p>
       </div>
       <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-800/50">
-        <p class="text-slate-500 dark:text-slate-400">Saldo</p>
+        <p class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400"><%= icon_svg("wallet", class_name: "h-3.5 w-3.5 shrink-0") %> Saldo</p>
         <p class="mt-0.5 font-semibold tabular-nums <%= flow_net.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400' %>" data-privacy-target="value"><%= number_to_currency(flow_net) %></p>
       </div>
     </div>
@@ -64,7 +67,10 @@
 
   <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
     <div class="flex items-start justify-between gap-2 mb-3">
-      <h3 class="text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">Composição</h3>
+      <h3 class="flex items-center gap-2 text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">
+        <span class="text-sky-600 dark:text-sky-300"><%= icon_svg("pie-chart") %></span>
+        Composição
+      </h3>
       <span class="text-xs text-slate-500 dark:text-slate-400">Receita vs Despesa</span>
     </div>
     <div class="h-60">
@@ -92,7 +98,10 @@
 
   <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
     <div class="flex items-start justify-between gap-2 mb-3">
-      <h3 class="text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">Top despesas</h3>
+      <h3 class="flex items-center gap-2 text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">
+        <span class="text-amber-600 dark:text-amber-300"><%= icon_svg("tag") %></span>
+        Top despesas
+      </h3>
       <div class="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
         <span class="text-slate-500 dark:text-slate-400">por categoria</span>
         <% categories = data[:category_options] || @category_options || [] %>
