@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   end
 
   resources :categories, except: %i[show]
-  resources :category_budgets, only: %i[edit create update destroy]
+  resources :category_budgets, only: %i[new edit create update destroy]
   resources :credit_card_invoices, only: [] do
     member do
       patch :pay
@@ -23,6 +23,8 @@ Rails.application.routes.draw do
   post "transactions/import_statement_pdf", to: "transactions#create_statement_import", as: :create_statement_import_transactions
   get "search", to: "searches#index", as: :search
   get "search/preview", to: "searches#preview", as: :search_preview
+  get "planning", to: "planning#index", as: :planning
+  get "reports", to: "reports#index", as: :reports
   post "webhooks/evolution", to: "webhooks/evolution#create"
   get "dashboard", to: "dashboard#index"
 

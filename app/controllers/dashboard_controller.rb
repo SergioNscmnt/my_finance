@@ -21,8 +21,6 @@ class DashboardController < ApplicationController
 
     @category_filter  = params[:category].presence
     @category_options = current_user.categories.expense.order(:name).pluck(:name)
-    @selected_budget_month = selected_budget_month
-
     @list_label = "Transações por mês"
     @transactions = current_user.transactions
                                 .includes(:category)
@@ -30,7 +28,6 @@ class DashboardController < ApplicationController
                                 .to_a
     @transactions_grouped = group_by_month(@transactions)
 
-    load_budget_planner_data(transactions, @selected_budget_month)
     load_credit_card_invoice_data(transactions)
     build_chart_data(transactions)
   end
@@ -147,62 +144,6 @@ class DashboardController < ApplicationController
     series_months.index_with do |month|
       Transaction.cumulative_balance_for(transactions, month)
     end
-  end
-
-  def load_budget_planner_data(transactions, budget_month)
-    @category_budget = current_user.category_budgets.new(budget_month: budget_month)
-    @budget_categories = current_user.categories.expense.order(:name)
-    @category_budgets = current_user.category_budgets
-                                    .where(budget_month: budget_month)
-                                    .includes(:category)
-                                    .joins(:category)
-                                    .order("categories.name ASC")
-    budget_category_ids = @category_budgets.map(&:category_id)
-
-    @budget_spent_by_category_id = Hash.new(0.0)
-    transactions.each do |transaction|
-      next unless transaction.expense?
-      next unless budget_category_ids.include?(transaction.category_id)
-
-      @budget_spent_by_category_id[transaction.category_id] += transaction.monthly_amount_for(budget_month)
-    end
-
-    @budget_remaining_by_category_id = {}
-    @budget_progress_by_category_id = {}
-    @category_budgets.each do |budget|
-      planned_amount = budget.amount.to_f
-      spent_amount = @budget_spent_by_category_id[budget.category_id].to_f
-      remaining_amount = planned_amount - spent_amount
-      progress = planned_amount.positive? ? ((spent_amount / planned_amount) * 100).round(1) : 0.0
-
-      @budget_remaining_by_category_id[budget.category_id] = remaining_amount
-      @budget_progress_by_category_id[budget.category_id] = progress
-    end
-
-    @planned_budget_total = @category_budgets.to_a.sum { |budget| budget.amount.to_d }
-    # "Disponível" deve refletir o saldo atual; planejamento só impacta após gasto real.
-    @available_after_budget = @balance
-
-    @budget_labels = @category_budgets.map { |budget| budget.category.name }
-    @budget_values = @category_budgets.map { |budget| budget.amount.to_f }
-  end
-
-  def selected_budget_month
-    return Date.current.beginning_of_month unless budget_planner_frame_request?
-
-    safe_month(params[:budget_month]) || Date.current.beginning_of_month
-  end
-
-  def budget_planner_frame_request?
-    request.headers["Turbo-Frame"] == "dashboard-budget-planner"
-  end
-
-  def safe_month(raw)
-    return nil if raw.blank?
-
-    Date.parse(raw.to_s).beginning_of_month
-  rescue ArgumentError
-    nil
   end
 
   def load_credit_card_invoice_data(transactions)

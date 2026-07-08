@@ -1,0 +1,267 @@
+<div class="w-full px-4 py-6 space-y-6 sm:px-6 lg:px-8" data-controller="privacy">
+    <% selected_month = @selected_budget_month.to_date.beginning_of_month %>
+    <% previous_month = selected_month.prev_month %>
+    <% previous_budgets = current_user.category_budgets.where(budget_month: previous_month) %>
+    <% previous_total = previous_budgets.to_a.sum { |budget| budget.amount.to_d }.to_f %>
+    <% planned_total = @planned_budget_total.to_f %>
+    <% total_variation = previous_total.positive? ? (((planned_total - previous_total) / previous_total) * 100).round(1) : 0 %>
+    <% usage_width = [[@budget_usage_percent.to_f, 0].max, 100].min %>
+
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Planejamento</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-400">Gerencie limites por categoria e monitore o uso real do mês.</p>
+      </div>
+
+      <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+        <%= form_with url: planning_path, method: :get, class: "flex items-center gap-2 dark:text-slate-200" do %>
+          <span class="text-slate-500 dark:text-slate-400"><%= icon_svg("calendar", class_name: "h-4 w-4") %></span>
+          <% month_options = (11.downto(0).map { |offset| selected_month.advance(months: -offset) } + (1..6).map { |offset| selected_month.advance(months: offset) }).uniq %>
+          <%= select_tag :budget_month,
+                options_for_select(month_options.map { |month| [l(month, format: "%B %Y"), month.strftime("%Y-%m-%d")] }, selected_month.strftime("%Y-%m-%d")),
+                class: "w-40 cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold focus:outline-none focus:ring-0 dark:bg-slate-950 dark:text-slate-100",
+                data: { no_tom_select: true },
+                onchange: "this.form.requestSubmit()" %>
+        <% end %>
+
+        <%= link_to new_category_budget_path(budget_month: selected_month.strftime("%Y-%m")),
+              data: { turbo_frame: "modal" },
+              class: "inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline focus:outline-2 focus:outline-emerald-400" do %>
+          <span class="text-base leading-none">+</span>
+          Novo Orçamento
+        <% end %>
+      </div>
+    </div>
+
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <span class="rounded-xl bg-blue-50 p-2 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"><%= icon_svg("wallet", class_name: "h-5 w-5") %></span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">vs. mês anterior</span>
+        </div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Orçado</p>
+        <p class="mt-1 text-2xl font-semibold text-slate-950 dark:text-slate-50" data-privacy-target="value"><%= number_to_currency(@planned_budget_total) %></p>
+        <p class="mt-3 text-xs font-semibold <%= total_variation.negative? ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' %>">
+          <%= total_variation.positive? ? "+" : "" %><%= total_variation %>%
+        </p>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <span class="rounded-xl bg-amber-50 p-2 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"><%= icon_svg("arrow-up-right", class_name: "h-5 w-5") %></span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Gasto Real</span>
+        </div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Realizado</p>
+        <p class="mt-1 text-2xl font-semibold text-slate-950 dark:text-slate-50" data-privacy-target="value"><%= number_to_currency(@budget_spent_total) %></p>
+        <p class="mt-3 text-xs font-semibold text-slate-500 dark:text-slate-400"><%= @budget_usage_percent %>% do orçamento</p>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <span class="rounded-xl bg-emerald-50 p-2 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"><%= icon_svg("target", class_name: "h-5 w-5") %></span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Restante</span>
+        </div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saldo Planejado</p>
+        <p class="mt-1 text-2xl font-semibold <%= @budget_remaining_total.negative? ? 'text-red-600 dark:text-red-400' : 'text-slate-950 dark:text-slate-50' %>" data-privacy-target="value"><%= number_to_currency(@budget_remaining_total) %></p>
+        <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div class="h-full rounded-full <%= @budget_remaining_total.negative? ? 'bg-red-500' : 'bg-emerald-500' %>" style="width: <%= usage_width %>%"></div>
+        </div>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <span class="rounded-xl bg-purple-50 p-2 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300"><%= icon_svg("layers", class_name: "h-5 w-5") %></span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400"><%= l(selected_month, format: "%B %Y") %></span>
+        </div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categorias</p>
+        <p class="mt-1 text-2xl font-semibold text-slate-950 dark:text-slate-50"><%= @category_budgets.size %></p>
+        <p class="mt-3 text-xs font-semibold text-slate-500 dark:text-slate-400"><%= @budget_categories.size %> disponíveis para orçamento</p>
+      </article>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-50">Planejamento por Categoria</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Comparativo entre meta e realizado no mês selecionado.</p>
+          </div>
+          <div class="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-slate-300 dark:bg-slate-700"></span> Meta</span>
+            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-blue-600"></span> Realizado</span>
+          </div>
+        </div>
+
+        <% if @category_budgets.any? %>
+          <% max_chart_value = @category_budgets.map { |budget| [budget.amount.to_f, @budget_spent_by_category_id[budget.category_id].to_f].max }.max.to_f %>
+          <div class="flex h-80 items-end gap-4 overflow-x-auto border-b border-slate-200 pb-4 dark:border-slate-700">
+            <% @category_budgets.each do |budget| %>
+              <% planned_amount = budget.amount.to_f %>
+              <% spent_amount = @budget_spent_by_category_id[budget.category_id].to_f %>
+              <% planned_height = max_chart_value.positive? ? ((planned_amount / max_chart_value) * 100).round(1) : 0 %>
+              <% spent_height = max_chart_value.positive? ? ((spent_amount / max_chart_value) * 100).round(1) : 0 %>
+              <% over_budget = spent_amount > planned_amount %>
+              <div class="flex min-w-20 flex-1 flex-col items-center gap-2">
+                <div class="flex h-60 w-full items-end justify-center gap-1.5">
+                  <div class="w-5 rounded-t bg-slate-300 dark:bg-slate-700" style="height: <%= planned_height %>%"></div>
+                  <div class="w-5 rounded-t <%= over_budget ? 'bg-red-500' : 'bg-blue-600' %>" style="height: <%= spent_height %>%"></div>
+                </div>
+                <span class="max-w-24 truncate text-xs font-medium text-slate-600 dark:text-slate-300" title="<%= budget.category.name %>"><%= budget.category.name %></span>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <%= render "shared/empty_alert",
+                title: "Sem comparação",
+                message: "Cadastre limites por categoria para visualizar meta e realizado.",
+                tone: :info,
+                compact: true %>
+        <% end %>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-lg font-semibold">Mapa de risco do orçamento</h2>
+        <p class="mt-1 text-sm text-slate-300">Leitura rápida das categorias com maior consumo do limite.</p>
+
+        <% risk_budgets = @category_budgets.sort_by { |budget| -@budget_progress_by_category_id.fetch(budget.category_id, 0).to_f }.first(4) %>
+        <% if risk_budgets.any? %>
+          <div class="mt-6 space-y-3">
+            <% risk_budgets.each do |budget| %>
+              <% progress = @budget_progress_by_category_id.fetch(budget.category_id, 0).to_f %>
+              <% risk_width = [[progress, 0].max, 100].min %>
+              <div class="rounded-xl border border-white/10 bg-white/5 p-3">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="truncate text-sm font-semibold"><%= budget.category.name %></span>
+                  <span class="text-xs text-slate-300"><%= progress.round(1) %>%</span>
+                </div>
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                  <div class="h-full rounded-full <%= progress >= 100 ? 'bg-red-400' : progress >= 80 ? 'bg-amber-300' : 'bg-emerald-300' %>" style="width: <%= risk_width %>%"></div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">Sem categorias planejadas para mapear riscos.</p>
+        <% end %>
+      </article>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex flex-col gap-3 border-b border-slate-200 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-50">Gestão de Limites por Categoria</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Limites, gastos, progresso e ações para o mês selecionado.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+            <tr>
+              <th class="px-5 py-3 font-semibold">Categoria</th>
+              <th class="px-5 py-3 text-right font-semibold">Limite Mensal</th>
+              <th class="px-5 py-3 text-right font-semibold">Gasto Atual</th>
+              <th class="px-5 py-3 font-semibold">Progresso</th>
+              <th class="px-5 py-3 font-semibold">Alerta</th>
+              <th class="px-5 py-3 text-center font-semibold">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            <% if @category_budgets.any? %>
+              <% @category_budgets.each do |budget| %>
+                <% spent_amount = @budget_spent_by_category_id[budget.category_id].to_f %>
+                <% progress = @budget_progress_by_category_id.fetch(budget.category_id, 0).to_f %>
+                <% progress_width = [[progress, 0].max, 100].min %>
+                <% status_label = progress >= 100 ? "Crítico" : progress >= 80 ? "Atenção" : "Saudável" %>
+                <% status_classes = progress >= 100 ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" : progress >= 80 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" %>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <span class="rounded-lg bg-slate-100 p-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400"><%= category_icon(budget.category, class_name: "h-4 w-4") %></span>
+                      <span class="font-medium text-slate-900 dark:text-slate-100"><%= budget.category.name %></span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-right tabular-nums" data-privacy-target="value"><%= number_to_currency(budget.amount) %></td>
+                  <td class="px-5 py-4 text-right tabular-nums" data-privacy-target="value"><%= number_to_currency(spent_amount) %></td>
+                  <td class="min-w-48 px-5 py-4">
+                    <div class="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <div class="h-full rounded-full <%= progress >= 100 ? 'bg-red-500' : progress >= 80 ? 'bg-amber-400' : 'bg-emerald-500' %>" style="width: <%= progress_width %>%"></div>
+                    </div>
+                  </td>
+                  <td class="px-5 py-4">
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase <%= status_classes %>"><%= status_label %></span>
+                  </td>
+                  <td class="px-5 py-4 text-center">
+                    <%= link_to "Editar", edit_category_budget_path(budget, budget_month: selected_month.strftime("%Y-%m")), data: { turbo_frame: "modal" }, class: "text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200" %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="6" class="px-5 py-8">
+                  <%= render "shared/empty_alert",
+                        title: "Nenhum limite cadastrado",
+                        message: "Use o formulário de planejamento para adicionar limites por categoria.",
+                        tone: :warning,
+                        compact: true %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-5 flex items-center gap-2">
+          <span class="text-amber-500"><%= icon_svg("target", class_name: "h-5 w-5") %></span>
+          <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-50">Sugestões de Economia</h2>
+        </div>
+
+        <% over_budget = @category_budgets.select { |budget| @budget_progress_by_category_id.fetch(budget.category_id, 0).to_f >= 100 } %>
+        <% attention_budget = @category_budgets.select { |budget| progress = @budget_progress_by_category_id.fetch(budget.category_id, 0).to_f; progress >= 80 && progress < 100 } %>
+        <div class="space-y-3">
+          <% if over_budget.any? %>
+            <div class="rounded-xl border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-950/20">
+              <p class="font-semibold text-slate-900 dark:text-slate-100">Categorias acima do limite</p>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-300"><%= over_budget.map { |budget| budget.category.name }.to_sentence %> já excederam o orçamento planejado.</p>
+            </div>
+          <% end %>
+          <% if attention_budget.any? %>
+            <div class="rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 dark:bg-amber-950/20">
+              <p class="font-semibold text-slate-900 dark:text-slate-100">Atenção no fim do mês</p>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-300"><%= attention_budget.map { |budget| budget.category.name }.to_sentence %> passaram de 80% do limite.</p>
+            </div>
+          <% end %>
+          <div class="rounded-xl border-l-4 border-emerald-500 bg-emerald-50 p-4 dark:bg-emerald-950/20">
+            <p class="font-semibold text-slate-900 dark:text-slate-100">Resumo disponível</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Saldo planejado do mês: <span data-privacy-target="value"><%= number_to_currency(@budget_remaining_total) %></span>.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
+        <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-50">Histórico de Metas</h2>
+          <% average_accuracy = @budget_history.any? ? (@budget_history.sum { |entry| entry[:accuracy].to_f } / @budget_history.size).round(1) : 0 %>
+          <span class="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"><%= average_accuracy %>% precisão média</span>
+        </div>
+
+        <div class="flex h-64 items-end gap-4 border-b border-slate-200 pb-4 dark:border-slate-700">
+          <% max_history_value = @budget_history.map { |entry| [entry[:planned], entry[:spent]].max }.max.to_f %>
+          <% @budget_history.each do |entry| %>
+            <% planned_height = max_history_value.positive? ? ((entry[:planned] / max_history_value) * 100).round(1) : 0 %>
+            <% spent_height = max_history_value.positive? ? ((entry[:spent] / max_history_value) * 100).round(1) : 0 %>
+            <div class="flex flex-1 flex-col items-center gap-2">
+              <div class="flex h-48 w-full items-end justify-center gap-1.5">
+                <div class="w-4 rounded-t bg-slate-300 dark:bg-slate-700" style="height: <%= planned_height %>%"></div>
+                <div class="w-4 rounded-t bg-slate-950 dark:bg-slate-100" style="height: <%= spent_height %>%"></div>
+              </div>
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400"><%= l(entry[:month], format: "%b") %></span>
+            </div>
+          <% end %>
+        </div>
+      </article>
+    </section>
+</div>

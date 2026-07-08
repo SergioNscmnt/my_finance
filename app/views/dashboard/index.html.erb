@@ -33,22 +33,6 @@
       } %>
     </div>
 
-    <turbo-frame id="dashboard-budget-planner">
-      <%= render "dashboard/budget_planner",
-            category_budget: @category_budget,
-            selected_budget_month: @selected_budget_month,
-            budget_categories: @budget_categories,
-            category_budgets: @category_budgets,
-            balance: @balance,
-            planned_budget_total: @planned_budget_total,
-            available_after_budget: @available_after_budget,
-            budget_labels: @budget_labels,
-            budget_values: @budget_values,
-            budget_spent_by_category_id: @budget_spent_by_category_id,
-            budget_remaining_by_category_id: @budget_remaining_by_category_id,
-            budget_progress_by_category_id: @budget_progress_by_category_id %>
-    </turbo-frame>
-
     <!-- Lista de transações -->
     <turbo-frame id="dashboard_transactions" class="block mt-6">
       <%= render "dashboard/transactions", transactions_grouped: @transactions_grouped, list_label: @list_label %>

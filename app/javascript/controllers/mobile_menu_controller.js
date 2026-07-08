@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Simple mobile menu toggle for the top nav.
 export default class extends Controller {
-  static targets = ["panel", "iconOpen", "iconClose"]
+  static targets = ["panel", "overlay", "iconOpen", "iconClose"]
 
   toggle() {
     const isOpen = !this.panelTarget.classList.contains("hidden")
@@ -16,6 +16,9 @@ export default class extends Controller {
   open() {
     this.panelTarget.classList.remove("hidden")
     this.panelTarget.classList.add("flex")
+    if (this.hasOverlayTarget) {
+      this.overlayTarget.classList.remove("hidden")
+    }
     this.iconOpenTarget.classList.toggle("hidden")
     this.iconCloseTarget.classList.toggle("hidden")
   }
@@ -23,6 +26,9 @@ export default class extends Controller {
   close() {
     this.panelTarget.classList.add("hidden")
     this.panelTarget.classList.remove("flex")
+    if (this.hasOverlayTarget) {
+      this.overlayTarget.classList.add("hidden")
+    }
     this.iconOpenTarget.classList.remove("hidden")
     this.iconCloseTarget.classList.add("hidden")
   }

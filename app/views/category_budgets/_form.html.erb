@@ -1,7 +1,15 @@
 <% frame_id = local_assigns[:frame_id] || "_top" %>
 
 <%= form_with model: category_budget, data: { turbo_frame: frame_id }, class: "grid grid-cols-1 gap-4" do |f| %>
-  <%= f.hidden_field :budget_month, value: category_budget.budget_month&.strftime("%Y-%m-%d") %>
+  <div class="space-y-1">
+    <%= f.label :budget_month, "Mês", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
+    <%= f.month_field :budget_month,
+          value: category_budget.budget_month&.strftime("%Y-%m"),
+          id: "category-budget-month",
+          autocomplete: "off",
+          placeholder: "MM/AAAA",
+          class: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400" %>
+  </div>
 
   <div class="space-y-1">
     <%= f.label :category_id, "Categoria", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
@@ -25,10 +33,12 @@
     <%= f.label :amount, "Valor planejado", class: "text-sm font-medium text-slate-700 dark:text-slate-200" %>
     <div data-controller="currency">
       <%= f.hidden_field :amount, value: category_budget.amount.to_f, data: { currency_target: "hidden" } %>
-      <%= text_field_tag :category_budget_amount_display,
+      <%= telephone_field_tag :category_budget_amount_display,
             number_to_currency(category_budget.amount),
             name: nil,
             inputmode: "numeric",
+            pattern: "[0-9]*",
+            enterkeyhint: "done",
             autocomplete: "off",
             class: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-400",
             data: { currency_target: "display", action: "input->currency#format blur->currency#format" } %>
@@ -40,7 +50,8 @@
 
   <div class="flex flex-col gap-2 sm:flex-row">
     <%= f.submit "Salvar", class: "inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline focus:outline-2 focus:outline-blue-400 sm:w-auto" %>
-    <% cancel_options = frame_id == "modal" ? { data: { action: "modal#close" } } : {} %>
-    <%= link_to "Cancelar", frame_id == "modal" ? "#" : dashboard_path, { class: "inline-flex w-full justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:w-auto text-center" }.merge(cancel_options) %>
+    <% cancel_in_modal = local_assigns[:cancel_in_modal] || frame_id == "modal" %>
+    <% cancel_options = cancel_in_modal ? { data: { action: "modal#close" } } : {} %>
+    <%= link_to "Cancelar", cancel_in_modal ? "#" : planning_path, { class: "inline-flex w-full justify-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 focus:outline focus:outline-2 focus:outline-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:w-auto text-center" }.merge(cancel_options) %>
   </div>
 <% end %>

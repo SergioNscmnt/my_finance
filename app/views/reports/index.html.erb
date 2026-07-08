@@ -1,0 +1,270 @@
+<div class="w-full px-4 py-6 space-y-6 sm:px-6 lg:px-8" data-controller="privacy">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Relatórios Financeiros</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Analise entradas, saídas, economia e documentos financeiros.</p>
+    </div>
+  </div>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+    <%= form_with url: reports_path, method: :get, class: "flex flex-col gap-4 2xl:flex-row 2xl:items-end 2xl:justify-between" do %>
+      <div class="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div>
+          <%= label_tag :start_date, "Data inicial", class: "mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400" %>
+          <label class="flex h-11 items-center gap-2">
+            <span class="text-slate-500 dark:text-slate-400"><%= icon_svg("calendar", class_name: "h-4 w-4") %></span>
+            <%= date_field_tag :start_date,
+                  @period_start,
+                  min: @min_report_date,
+                  max: @max_report_date,
+                  class: "w-full cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-0 dark:bg-slate-950 dark:text-slate-100" %>
+          </label>
+        </div>
+
+        <div>
+          <%= label_tag :end_date, "Data final", class: "mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400" %>
+          <label class="flex h-11 items-center gap-2">
+            <span class="text-slate-500 dark:text-slate-400"><%= icon_svg("calendar", class_name: "h-4 w-4") %></span>
+            <%= date_field_tag :end_date,
+                  @period_end,
+                  min: @min_report_date,
+                  max: @max_report_date,
+                  class: "w-full cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-0 dark:bg-slate-950 dark:text-slate-100" %>
+          </label>
+        </div>
+
+        <div>
+          <%= label_tag :report_type, "Tipo de Relatório", class: "mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400" %>
+          <%= select_tag :report_type,
+                options_for_select([["Fluxo de Caixa", "cash_flow"], ["Resumo por Categoria", "category_summary"], ["Evolução Patrimonial", "equity_evolution"]], @report_type),
+                class: "h-11 w-full cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100",
+                data: { no_tom_select: true } %>
+        </div>
+
+        <div>
+          <%= label_tag :account, "Conta", class: "mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400" %>
+          <%= select_tag :account,
+                options_for_select([["Todas as Contas", "all"], ["Dinheiro", "cash"], ["Pix", "pix"], ["Cartão de Crédito", "credit_card"]], @account_filter),
+                class: "h-11 w-full cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100",
+                data: { no_tom_select: true } %>
+        </div>
+
+        <div>
+          <%= label_tag :export_format, "Formato", class: "mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400" %>
+          <%= select_tag :export_format,
+                options_for_select([["PDF", "pdf"], ["Excel (.xlsx)", "xlsx"]], params[:export_format].presence || "pdf"),
+                class: "h-11 w-full cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100",
+                data: { no_tom_select: true } %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:w-auto">
+        <%= link_to reports_path, class: "inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" do %>
+          <%= icon_svg("trash", class_name: "h-4 w-4") %>
+          Limpar filtros
+        <% end %>
+        <%= button_tag type: :submit, formtarget: "_blank", class: "inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow transition hover:bg-blue-700" do %>
+          <%= icon_svg("chart-line", class_name: "h-4 w-4") %>
+          Gerar relatório
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <article class="rounded-2xl border border-l-4 border-l-emerald-500 border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:border-l-emerald-400 dark:bg-slate-900">
+      <div class="mb-4 flex items-start justify-between">
+        <span class="rounded-xl bg-emerald-50 p-2 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"><%= icon_svg("banknote", class_name: "h-5 w-5") %></span>
+        <span class="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"><%= @income_variation.positive? ? "+" : "" %><%= @income_variation %>%</span>
+      </div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Renda Total</p>
+      <h3 class="mt-1 text-2xl font-bold tabular-nums text-slate-950 dark:text-slate-50" data-privacy-target="value"><%= number_to_currency(@total_income) %></h3>
+    </article>
+
+    <article class="rounded-2xl border border-l-4 border-l-red-500 border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:border-l-red-400 dark:bg-slate-900">
+      <div class="mb-4 flex items-start justify-between">
+        <span class="rounded-xl bg-red-50 p-2 text-red-700 dark:bg-red-950/50 dark:text-red-300"><%= icon_svg("shopping-bag", class_name: "h-5 w-5") %></span>
+        <span class="rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-700 dark:bg-red-950/50 dark:text-red-300"><%= @expense_variation.positive? ? "+" : "" %><%= @expense_variation %>%</span>
+      </div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Gastos Totais</p>
+      <h3 class="mt-1 text-2xl font-bold tabular-nums text-slate-950 dark:text-slate-50" data-privacy-target="value"><%= number_to_currency(@total_expense) %></h3>
+    </article>
+
+    <article class="rounded-2xl border border-l-4 border-l-blue-500 border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:border-l-blue-400 dark:bg-slate-900">
+      <div class="mb-4 flex items-start justify-between">
+        <span class="rounded-xl bg-blue-50 p-2 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"><%= icon_svg("save", class_name: "h-5 w-5") %></span>
+        <span class="rounded bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"><%= @savings_variation.positive? ? "+" : "" %><%= @savings_variation %>%</span>
+      </div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Economia do Período</p>
+      <h3 class="mt-1 text-2xl font-bold tabular-nums <%= @total_savings.negative? ? 'text-red-600 dark:text-red-400' : 'text-slate-950 dark:text-slate-50' %>" data-privacy-target="value"><%= number_to_currency(@total_savings) %></h3>
+    </article>
+
+    <article class="rounded-2xl border border-l-4 border-l-purple-500 border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:border-l-purple-400 dark:bg-slate-900">
+      <div class="mb-4 flex items-start justify-between">
+        <span class="rounded-xl bg-purple-50 p-2 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300"><%= icon_svg("target", class_name: "h-5 w-5") %></span>
+        <span class="rounded bg-purple-50 px-2 py-1 text-xs font-bold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300"><%= @savings_rate_variation.positive? ? "+" : "" %><%= @savings_rate_variation %> p.p.</span>
+      </div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Taxa de Poupança</p>
+      <h3 class="mt-1 text-2xl font-bold tabular-nums text-slate-950 dark:text-slate-50"><%= @savings_rate %>%</h3>
+    </article>
+  </section>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-slate-950 dark:text-slate-50">Evolução Financeira</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Comparativo mensal de entradas vs saídas.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 dark:text-slate-400">
+        <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-600"></span> Entradas</span>
+        <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-slate-300 dark:bg-slate-700"></span> Saídas</span>
+        <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-emerald-500"></span> Economia</span>
+      </div>
+    </div>
+
+    <div class="flex h-80 items-end justify-between gap-3 overflow-x-auto border-b border-slate-200 pb-4 dark:border-slate-800">
+      <% @months.each_with_index do |_month, index| %>
+        <% income_height = @max_monthly_amount.positive? ? ((@monthly_income[index].to_f / @max_monthly_amount) * 100).round(1) : 0 %>
+        <% expense_height = @max_monthly_amount.positive? ? ((@monthly_expense[index].to_f / @max_monthly_amount) * 100).round(1) : 0 %>
+        <div class="group flex min-w-14 flex-1 flex-col items-center gap-2">
+          <div class="flex h-64 w-full items-end justify-center gap-1">
+            <div class="w-4 rounded-t bg-slate-300 transition group-hover:opacity-80 dark:bg-slate-700" style="height: <%= expense_height %>%"></div>
+            <div class="w-4 rounded-t bg-blue-600 transition group-hover:scale-y-105" style="height: <%= income_height %>%"></div>
+          </div>
+          <span class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400"><%= @month_labels[index] %></span>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-950 dark:text-slate-50">Gastos por Categoria</h2>
+        <span class="text-slate-400"><%= icon_svg("pie-chart", class_name: "h-5 w-5") %></span>
+      </div>
+
+      <% if @category_totals.any? %>
+        <div class="flex flex-col items-center gap-8 lg:flex-row">
+          <div class="relative flex h-48 w-48 shrink-0 items-center justify-center">
+            <% donut_colors = ["#2563eb", "#64748b", "#cbd5e1", "#bfdbfe"] %>
+            <% donut_offset = 0.0 %>
+            <svg class="h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+              <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="currentColor" stroke-width="4" class="text-slate-100 dark:text-slate-800"></circle>
+              <% @category_totals.each_with_index do |(_category, total), index| %>
+                <% share = @category_expense_total.positive? ? ((total / @category_expense_total) * 100) : 0 %>
+                <circle cx="18"
+                        cy="18"
+                        r="15.915"
+                        fill="transparent"
+                        stroke="<%= donut_colors[index] %>"
+                        stroke-width="4"
+                        stroke-dasharray="<%= share.round(2) %> <%= (100 - share).round(2) %>"
+                        stroke-dashoffset="-<%= donut_offset.round(2) %>"></circle>
+                <% donut_offset += share %>
+              <% end %>
+            </svg>
+            <div class="absolute flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white text-center dark:bg-slate-900">
+              <span class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Total</span>
+              <span class="text-lg font-bold text-slate-950 dark:text-slate-50" data-privacy-target="value"><%= number_to_currency(@category_expense_total, precision: 0) %></span>
+            </div>
+          </div>
+
+          <div class="w-full flex-1 space-y-3">
+            <% @category_totals.each_with_index do |(category, total), index| %>
+              <% share = @category_expense_total.positive? ? ((total / @category_expense_total) * 100).round(1) : 0 %>
+              <div class="flex items-center justify-between gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <div class="flex min-w-0 items-center gap-2">
+                  <span class="h-3 w-3 shrink-0 rounded-full" style="background-color: <%= donut_colors[index] %>"></span>
+                  <span class="truncate"><%= category&.name || "Sem categoria" %></span>
+                </div>
+                <span class="font-bold tabular-nums"><%= share %>%</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <%= render "shared/empty_alert", title: "Sem gastos por categoria", message: "Cadastre despesas para visualizar esta distribuição.", tone: :info, compact: true %>
+      <% end %>
+    </article>
+
+    <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-950 dark:text-slate-50">Maiores Gastos do Período</h2>
+        <span class="text-slate-400"><%= icon_svg("receipt", class_name: "h-5 w-5") %></span>
+      </div>
+
+      <% if @biggest_expenses.any? %>
+        <div class="space-y-5">
+          <% @biggest_expenses.each do |entry| %>
+            <% transaction = entry[:transaction] %>
+            <% width = @biggest_expense_total.positive? ? ((entry[:amount] / @biggest_expense_total) * 100).round(1) : 0 %>
+            <div class="space-y-2">
+              <div class="flex justify-between gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <span class="truncate"><%= transaction.title %></span>
+                <span class="shrink-0 font-bold tabular-nums" data-privacy-target="value"><%= number_to_currency(entry[:amount]) %></span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div class="h-full rounded-full bg-blue-600" style="width: <%= width %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <%= render "shared/empty_alert", title: "Sem maiores gastos", message: "Cadastre despesas para listar os maiores gastos do período.", tone: :info, compact: true %>
+      <% end %>
+    </article>
+  </section>
+
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+      <h2 class="text-lg font-bold text-slate-950 dark:text-slate-50">Relatórios e Documentos</h2>
+      <button type="button" class="text-xs font-bold uppercase tracking-widest text-blue-700 hover:underline dark:text-blue-300">Ver Todos</button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+          <tr>
+            <th class="px-6 py-4 font-bold">Documento</th>
+            <th class="px-6 py-4 font-bold">Data</th>
+            <th class="px-6 py-4 text-center font-bold">Formato</th>
+            <th class="px-6 py-4 text-right font-bold">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+          <% @report_documents.each do |document| %>
+            <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td class="px-6 py-5">
+                <div class="flex items-center gap-3">
+                  <span class="text-blue-700 dark:text-blue-300"><%= icon_svg(document[:icon], class_name: "h-5 w-5") %></span>
+                  <span class="font-medium text-slate-900 dark:text-slate-100"><%= document[:title] %></span>
+                </div>
+              </td>
+              <td class="px-6 py-5 text-slate-500 dark:text-slate-400"><%= l(document[:date], format: "%d %b, %Y") %></td>
+              <td class="px-6 py-5 text-center">
+                <span class="rounded px-2 py-1 text-[10px] font-bold <%= document[:format] == 'PDF' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' %>"><%= document[:format] %></span>
+              </td>
+              <td class="px-6 py-5 text-right">
+                <div class="inline-flex items-center gap-2">
+                  <button type="button" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" title="Download">
+                    <%= icon_svg("arrow-down-left", class_name: "h-4 w-4") %>
+                  </button>
+                  <button type="button" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" title="Compartilhar">
+                    <%= icon_svg("send", class_name: "h-4 w-4") %>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%= link_to reports_path(start_date: @period_start, end_date: @period_end, report_type: @report_type, account: @account_filter),
+        class: "fixed bottom-6 right-6 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-2xl transition hover:scale-105 hover:bg-blue-700",
+        aria: { label: "Gerar novo relatório" } do %>
+    <%= icon_svg("chart-line", class_name: "h-6 w-6") %>
+  <% end %>
+</div>

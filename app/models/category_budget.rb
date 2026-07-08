@@ -15,7 +15,12 @@ class CategoryBudget < ApplicationRecord
   private
 
   def normalize_budget_month
-    self.budget_month = (budget_month.presence || Date.current).to_date.beginning_of_month
+    value = budget_month.presence || Date.current
+    self.budget_month = if value.is_a?(String) && value.match?(/\A\d{4}-\d{2}\z/)
+      Date.strptime(value, "%Y-%m")
+    else
+      value.to_date.beginning_of_month
+    end
   end
 
   def category_must_belong_to_user

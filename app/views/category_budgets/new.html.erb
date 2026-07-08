@@ -1,9 +1,9 @@
 <%= turbo_frame_tag "modal" do %>
   <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
     <div class="mb-2 flex items-center justify-between">
-      <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Editar categoria planejada</h1>
+      <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Novo orçamento</h1>
     </div>
-    <p class="mb-4 text-sm text-slate-600 dark:text-slate-400">Ajuste a categoria e o valor planejado.</p>
+    <p class="mb-4 text-sm text-slate-600 dark:text-slate-400">Defina uma categoria, mês e valor planejado para acompanhar o limite.</p>
     <%= render "form", category_budget: @category_budget, budget_categories: @budget_categories, frame_id: "_top", cancel_in_modal: true %>
   </section>
 <% end %>

@@ -8,22 +8,25 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <script>
-      (() => {
-        let storedTheme = null
-        try {
-          storedTheme = localStorage.getItem("myfinance-theme")
-        } catch (_) {}
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-        const theme = storedTheme || (prefersDark ? "dark" : "light")
-        if (theme === "dark") {
-          document.documentElement.classList.add("dark")
-          document.addEventListener("DOMContentLoaded", () => {
-            if (document.body) document.body.classList.add("dark")
-          })
-        }
-      })();
-    </script>
+    <% auth_page = controller_name.in?(%w[sessions users]) && %w[new create].include?(action_name) %>
+    <% unless auth_page %>
+      <script>
+        (() => {
+          let storedTheme = null
+          try {
+            storedTheme = localStorage.getItem("myfinance-theme")
+          } catch (_) {}
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+          const theme = storedTheme || (prefersDark ? "dark" : "light")
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark")
+            document.addEventListener("DOMContentLoaded", () => {
+              if (document.body) document.body.classList.add("dark")
+            })
+          }
+        })();
+      </script>
+    <% end %>
 
     <!-- Tom Select (CDN) -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" />
@@ -47,16 +50,33 @@
   </head>
 
   <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100">
-    <% auth_page = controller_name == "sessions" && %w[new create].include?(action_name) %>
-
     <% if auth_page %>
-      <main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <header class="border-b border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <%= link_to root_path, class: "flex items-center gap-2" do %>
+            <%= image_tag "logo.svg", class: "h-9 w-9 shrink-0", alt: "MyFinance logo" %>
+            <span class="text-lg font-semibold text-slate-900">MyFinance</span>
+          <% end %>
+
+          <nav class="flex items-center gap-2" aria-label="Acesso">
+            <%= link_to "Entrar", new_session_path, class: "rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-blue-700" %>
+            <%= link_to "Criar Conta", new_user_path, class: "rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-blue-700" %>
+          </nav>
+        </div>
+      </header>
+
+      <main class="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
         <div class="w-full flex justify-center">
           <%= yield %>
         </div>
       </main>
     <% else %>
       <div class="flex-1 flex" data-controller="mobile-menu">
+        <button type="button"
+                class="hidden fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+                aria-label="Fechar menu"
+                data-mobile-menu-target="overlay"
+                data-action="click->mobile-menu#close"></button>
         <aside data-mobile-menu-target="panel" class="hidden fixed inset-y-0 left-0 z-40 w-72 flex-col border-r border-slate-200 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900 lg:static lg:z-0 lg:flex lg:shadow-none">
           <%= link_to root_path, class: "mb-6 flex items-center gap-2" do %>
             <%= image_tag "logo.svg", class: "h-10 w-10 shrink-0", alt: "MyFinance logo" %>
@@ -71,12 +91,15 @@
           </div>
 
           <% side_link_classes = "inline-flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-400" %>
-          <% side_danger_link_classes = "inline-flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 transition hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-200 bg-transparent cursor-pointer" %>
           <nav class="space-y-1">
             <% if current_user %>
               <%= link_to dashboard_path, class: side_link_classes do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
                 <span>Dashboard</span>
+              <% end %>
+              <%= link_to planning_path, class: side_link_classes do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.75v3.5"/><path d="M16 2.75v3.5"/><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="m9 15 2 2 4-5"/></svg>
+                <span>Planejamentos</span>
               <% end %>
               <%= link_to transactions_path, class: side_link_classes do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
@@ -85,6 +108,10 @@
               <%= link_to categories_path, class: side_link_classes do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="7.5" r="1.5"/><circle cx="7.5" cy="16.5" r="1.5"/><circle cx="16.5" cy="16.5" r="1.5"/><line x1="9" y1="7.5" x2="15" y2="7.5"/><line x1="9" y1="16.5" x2="15" y2="16.5"/><line x1="7.5" y1="9" x2="7.5" y2="15"/><line x1="16.5" y1="9" x2="16.5" y2="15"/></svg>
                 <span>Categorias</span>
+              <% end %>
+              <%= link_to reports_path, class: side_link_classes do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v2"/><path d="M11 11v6"/><path d="M15 7v10"/><path d="M19 13v4"/></svg>
+                <span>Relatórios</span>
               <% end %>
               <%= link_to account_path, class: side_link_classes do %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.25"/><path d="M5 19.25c0-3.15 3.1-5.25 7-5.25s7 2.1 7 5.25"/></svg>
@@ -102,9 +129,9 @@
             <% end %>
           </nav>
 
-          <div class="mt-auto pt-5">
+          <div class="mt-auto border-t border-slate-200 pt-4 dark:border-slate-800 lg:hidden">
             <button type="button"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
                     data-controller="theme"
                     data-action="click->theme#toggle"
                     data-theme-target="button"
@@ -114,8 +141,8 @@
               <span data-theme-target="label">Modo claro</span>
             </button>
             <% if current_user %>
-              <%= button_to session_path, method: :delete, form: { class: "mt-2 w-full" }, class: side_danger_link_classes do %>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 3.75A2.25 2.25 0 0 0 5.25 6v12a2.25 2.25 0 0 0 2.25 2.25H15A2.25 2.25 0 0 0 17.25 18v-1.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 1-.75.75H7.5A.75.75 0 0 1 6.75 18V6a.75.75 0 0 1 .75-.75H15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 1.5 0V6A2.25 2.25 0 0 0 15 3.75H7.5Zm9.22 4.72a.75.75 0 0 0-1.06 1.06l1.47 1.47H10.5a.75.75 0 0 0 0 1.5h6.63l-1.47 1.47a.75.75 0 0 0 1.06 1.06l2.75-2.75a.75.75 0 0 0 0-1.06l-2.75-2.75Z" clip-rule="evenodd"/></svg>
+              <%= button_to session_path, method: :delete, form: { class: "mt-2 w-full" }, class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-950/30" do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 3.75A2.25 2.25 0 0 0 5.25 6v12a2.25 2.25 0 0 0 2.25 2.25H15A2.25 2.25 0 0 0 17.25 18v-1.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 1-.75.75H7.5A.75.75 0 0 1 6.75 18V6a.75.75 0 0 1 .75-.75H15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 1.5 0V6A2.25 2.25 0 0 0 15 3.75H7.5Zm9.22 4.72a.75.75 0 0 0-1.06 1.06l1.47 1.47H10.5a.75.75 0 0 0 0 1.5h6.63l-1.47 1.47a.75.75 0 0 0 1.06 1.06l2.75-2.75a.75.75 0 0 0 0-1.06l-2.75-2.75Z" clip-rule="evenodd"/></svg>
                 <span>Sair</span>
               <% end %>
             <% end %>
@@ -147,8 +174,26 @@
                 </button>
               </div>
               <% if current_user %>
-                <div class="w-full lg:max-w-2xl">
-                  <%= render "shared/global_search_form" %>
+                <div class="flex w-full flex-col gap-2 lg:max-w-3xl lg:flex-row lg:items-center lg:justify-end">
+                  <div class="w-full lg:max-w-2xl">
+                    <%= render "shared/global_search_form" %>
+                  </div>
+                  <div class="hidden items-center gap-2 lg:flex lg:shrink-0">
+                    <button type="button"
+                            class="inline-flex h-10 cursor-pointer items-center justify-center gap-2 px-3 rounded-lg text-xs font-semibold text-slate-700 transition dark:hover:bg-slate-800 dark:text-white"
+                            data-controller="theme"
+                            data-action="click->theme#toggle"
+                            data-theme-target="button"
+                            aria-label="Alternar tema">
+                      <svg data-theme-target="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M21.752 15.002A9.718 9.718 0 0 1 12 21.75 9.75 9.75 0 0 1 8.998 2.25a.75.75 0 0 1 .743 1.125A8.25 8.25 0 0 0 20.625 14.26a.75.75 0 0 1 1.127.742Z" /></svg>
+                      <svg data-theme-target="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 w-4"><path d="M12 6.75a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Zm0-4.5a.75.75 0 0 1 .75.75V4.5a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75Zm0 16.5a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75ZM4.5 12a.75.75 0 0 1 .75-.75H6.75a.75.75 0 0 1 0 1.5H5.25A.75.75 0 0 1 4.5 12Zm12 0a.75.75 0 0 1 .75-.75H18.75a.75.75 0 0 1 0 1.5H17.25A.75.75 0 0 1 16.5 12ZM6.22 6.22a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06L6.22 7.28a.75.75 0 0 1 0-1.06Zm9.44 9.44a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06ZM6.22 17.78a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm9.44-9.44a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 1 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Z" /></svg>
+                      <span data-theme-target="label" class="hidden sm:inline">Modo claro</span>
+                    </button>
+                    <%= button_to session_path, method: :delete, form: { class: "m-0" }, class: "inline-flex h-10 cursor-pointer items-center justify-center gap-2 px-3 rounded-lg dark:hover:bg-slate-800 text-xs font-semibold text-red-600 transition hover:text-red-700 dark:text-red-300" do %>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 3.75A2.25 2.25 0 0 0 5.25 6v12a2.25 2.25 0 0 0 2.25 2.25H15A2.25 2.25 0 0 0 17.25 18v-1.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 1-.75.75H7.5A.75.75 0 0 1 6.75 18V6a.75.75 0 0 1 .75-.75H15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 1.5 0V6A2.25 2.25 0 0 0 15 3.75H7.5Zm9.22 4.72a.75.75 0 0 0-1.06 1.06l1.47 1.47H10.5a.75.75 0 0 0 0 1.5h6.63l-1.47 1.47a.75.75 0 0 0 1.06 1.06l2.75-2.75a.75.75 0 0 0 0-1.06l-2.75-2.75Z" clip-rule="evenodd"/></svg>
+                      <span class="hidden sm:inline">Sair</span>
+                    <% end %>
+                  </div>
                 </div>
               <% end %>
             </div>
